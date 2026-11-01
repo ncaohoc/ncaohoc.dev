@@ -1,0 +1,293 @@
+---
+import Base from '../layouts/Base.astro';
+import { cv } from '../data/cv';
+
+const links = cv.links.filter((l) => l.href);
+---
+
+<Base title="CV" description={`${cv.name} — ${cv.role}. Curriculum vitae.`}>
+  <div class="wrap">
+    <div class="cv-actions">
+      <button type="button" class="print" onclick="window.print()">In / Lưu PDF</button>
+    </div>
+
+    <article class="cv" lang="en">
+      <header class="cv-head">
+        <div>
+          <h1>{cv.name}</h1>
+          <p class="role">{cv.role}</p>
+        </div>
+        <ul class="contact">
+          <li>{cv.location}</li>
+          {cv.email && <li><a href={`mailto:${cv.email}`}>{cv.email}</a></li>}
+          {cv.website && <li><a href={`https://${cv.website}`}>{cv.website}</a></li>}
+          {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </header>
+
+      <section class="row">
+        <h2>Profile</h2>
+        <p class="summary">{cv.summary}</p>
+      </section>
+
+      <section class="row">
+        <h2>Experience</h2>
+        <div class="stack">
+          {
+            cv.experience.map((job) => (
+              <div class="job">
+                <div class="job-head">
+                  <h3>
+                    {job.title} <span>at {job.company}</span>
+                  </h3>
+                  {job.period && <p class="period">{job.period}</p>}
+                </div>
+                {job.points.length > 0 && (
+                  <ul>
+                    {job.points.map((p) => <li>{p}</li>)}
+                  </ul>
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="row">
+        <h2>Projects</h2>
+        <div class="stack">
+          {
+            cv.projects.map((p) => (
+              <div>
+                <h3><a href={p.href}>{p.name}</a></h3>
+                <p class="plain">{p.text}</p>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="row">
+        <h2>Skills</h2>
+        <dl class="skills">
+          {
+            cv.skills.map((s) => (
+              <div>
+                <dt>{s.group}</dt>
+                <dd>{s.items.join(', ')}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      {
+        cv.education.length > 0 && (
+          <section class="row">
+            <h2>Education</h2>
+            <div class="stack">
+              {cv.education.map((e) => (
+                <div class="job-head">
+                  <h3>
+                    {e.degree} <span>{e.school}</span>
+                  </h3>
+                  <p class="period">{e.period}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      <section class="row">
+        <h2>Languages</h2>
+        <p class="plain">
+          {cv.languages.map((l) => (l.level ? `${l.name} (${l.level})` : l.name)).join(', ')}
+        </p>
+      </section>
+    </article>
+  </div>
+</Base>
+
+<style>
+  .cv-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+  }
+  .print {
+    font: inherit;
+    font-size: var(--step--1);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .print:hover {
+    border-color: var(--ink);
+  }
+  .cv {
+    max-width: 52rem;
+    margin: 1.5rem auto 0;
+    padding: clamp(1.5rem, 5vw, 3.5rem);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-top: 6px solid var(--seal);
+    border-radius: 4px;
+  }
+  .cv-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1.25rem 2rem;
+    padding-bottom: 2rem;
+  }
+  h1 {
+    font-size: var(--step-3);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .role {
+    margin: 0.35rem 0 0;
+    font-size: var(--step-1);
+    color: var(--seal);
+    font-weight: 600;
+  }
+  .contact {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+    font-size: var(--step--1);
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .contact a {
+    color: inherit;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: 0.5rem 2rem;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  h2 {
+    font-size: var(--step-0);
+    font-weight: 700;
+    padding-top: 0.1rem;
+  }
+  h3 {
+    font-size: var(--step-0);
+    font-weight: 700;
+  }
+  h3 span {
+    font-weight: 400;
+    color: var(--muted);
+  }
+  h3 a {
+    color: var(--ink);
+  }
+  .summary,
+  .plain {
+    margin: 0;
+  }
+  .plain {
+    color: var(--muted);
+  }
+  .stack {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .job-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .period {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+  .job ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .job li + li {
+    margin-top: 0.25rem;
+  }
+  .skills {
+    margin: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .skills div {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 1rem;
+  }
+  .skills dt {
+    color: var(--muted);
+  }
+  .skills dd {
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+    .contact {
+      text-align: left;
+    }
+  }
+
+  /* Bản in: chỉ còn tờ CV, nền trắng, vừa khổ A4 */
+  @media print {
+    @page {
+      size: A4;
+      margin: 14mm;
+    }
+    :global(.site-header),
+    :global(.site-footer),
+    .cv-actions {
+      display: none !important;
+    }
+    :global(html),
+    :global(body) {
+      background: #fff !important;
+      color: #111 !important;
+      font-size: 10.5pt;
+    }
+    :global(:root),
+    :global(:root[data-theme='dark']) {
+      color-scheme: light;
+      --ink: #111;
+      --muted: #555;
+      --rule: #ddd;
+      --surface: #fff;
+      --seal: #b42a22;
+    }
+    .cv {
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-top: 4px solid var(--seal);
+      padding-top: 1rem;
+    }
+    .row {
+      break-inside: avoid;
+      padding-block: 0.9rem;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+</style>

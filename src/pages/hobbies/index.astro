@@ -1,0 +1,87 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+import AlbumGrid from '../../components/AlbumGrid.astro';
+import { published, slugify } from '../../site';
+
+const posts = published(await getCollection('hobbies'));
+const categories = [...new Set(posts.map((p) => p.data.category))];
+const albums = published(await getCollection('albums'));
+const recent = albums.slice(0, 3);
+---
+
+<Base title="Sở thích" description="Nhiếp ảnh, mô hình Armored Core và những thứ mình làm ngoài giờ code.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1>Sở thích</h1>
+      <p>Những thứ mình làm ngoài giờ code: chụp ảnh với vài hệ máy khác nhau, lắp mô hình.</p>
+      {
+        categories.length > 0 && (
+          <ul class="jump" aria-label="Chủ đề">
+            {categories.map((c) => (
+              <li><a href={`#${slugify(c)}`}>{c}</a></li>
+            ))}
+            <li><a href="/hobbies/anh/">Ảnh</a></li>
+          </ul>
+        )
+      }
+    </header>
+
+    <section class="section">
+      <h2><a href="/hobbies/anh/">Ảnh</a><small>{albums.length > 0 ? `${albums.length} album` : 'Album theo chủ đề'}</small></h2>
+      {
+        recent.length > 0 ? (
+          <div class="col">
+            <AlbumGrid albums={recent} />
+            {albums.length > recent.length && <p class="more"><a href="/hobbies/anh/">Xem tất cả album</a></p>}
+          </div>
+        ) : (
+          <p class="muted">Chưa có album nào.</p>
+        )
+      }
+    </section>
+
+    {
+      categories.map((c) => (
+        <section class="section" id={slugify(c)}>
+          <h2>{c}</h2>
+          <EntryList
+            items={posts
+              .filter((p) => p.data.category === c)
+              .map((p) => ({
+                href: `/hobbies/${p.id}/`,
+                title: p.data.title,
+                description: p.data.description,
+                date: p.data.date,
+                tags: p.data.gear,
+              }))}
+          />
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    font-weight: 500;
+  }
+  .col {
+    min-width: 0;
+  }
+  .more {
+    margin: 1.5rem 0 0;
+    font-weight: 600;
+  }
+  .muted {
+    margin: 0;
+    color: var(--muted);
+  }
+</style>

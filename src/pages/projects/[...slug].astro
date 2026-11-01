@@ -1,0 +1,33 @@
+---
+import { getCollection, render } from 'astro:content';
+import Post from '../../layouts/Post.astro';
+import { published } from '../../site';
+
+export async function getStaticPaths() {
+  const projects = published(await getCollection('projects'));
+  return projects.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+const aside = [
+  { label: 'Trạng thái', value: d.status },
+  ...(d.stack.length ? [{ label: 'Công nghệ', value: d.stack.join(', ') }] : []),
+  ...(d.repo ? [{ label: 'Mã nguồn', value: 'GitHub', href: d.repo }] : []),
+  ...(d.link ? [{ label: 'Xem thử', value: new URL(d.link).hostname, href: d.link }] : []),
+];
+---
+
+<Post
+  title={d.title}
+  description={d.description}
+  date={d.date}
+  updated={d.updated}
+  tags={d.tags}
+  aside={aside}
+  back={{ href: '/projects/', label: 'Dự án' }}
+>
+  <Content />
+</Post>

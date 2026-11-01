@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+import { published } from '../../site';
+
+const projects = published(await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Dự án" description="Những dự án cá nhân mình đang làm và đã làm xong.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1>Dự án</h1>
+      <p>Game, công cụ và hạ tầng mình tự dựng. Mỗi trang có tiến độ và những gì học được.</p>
+    </header>
+    <EntryList
+      items={projects.map((p) => ({
+        href: `/projects/${p.id}/`,
+        title: p.data.title,
+        description: p.data.description,
+        status: p.data.status,
+        tags: p.data.stack,
+      }))}
+    />
+  </div>
+</Base>

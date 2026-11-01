@@ -1,0 +1,106 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import PhotoGrid from '../../../components/PhotoGrid.astro';
+import { published, formatDate } from '../../../site';
+import { albumSlug, albumPhotos } from '../../../lib/albums';
+
+export async function getStaticPaths() {
+  const albums = published(await getCollection('albums'));
+  return albums.map((entry) => ({ params: { album: albumSlug(entry) }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const photos = albumPhotos(entry);
+
+const facts = [
+  { label: 'Ngày', value: formatDate(d.date) },
+  ...(d.camera ? [{ label: 'Máy', value: d.camera }] : []),
+  ...(d.lens ? [{ label: 'Ống kính', value: d.lens }] : []),
+  ...(d.location ? [{ label: 'Địa điểm', value: d.location }] : []),
+  { label: 'Số ảnh', value: String(photos.length) },
+];
+---
+
+<Base title={d.title} description={d.description || `Album ảnh ${d.title}`} type="article">
+  <div class="wrap">
+    <header class="album-head">
+      <a class="back" href="/hobbies/anh/">Tất cả album</a>
+      <h1>{d.title}</h1>
+      {d.description && <p class="desc">{d.description}</p>}
+      <dl class="facts">
+        {
+          facts.map((f) => (
+            <div>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </header>
+
+    <div class="prose story">
+      <Content />
+    </div>
+
+    {
+      photos.length > 0 ? (
+        <PhotoGrid photos={photos} id="album" alt={`Ảnh trong album ${d.title}`} />
+      ) : (
+        <p class="muted">Album này chưa có ảnh. Thả ảnh vào cùng thư mục với file index.md của album.</p>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .album-head {
+    padding-block: 3rem 2rem;
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--muted);
+    font-size: var(--step--1);
+    text-decoration: none;
+  }
+  .back::before {
+    content: '‹ ';
+  }
+  h1 {
+    font-size: var(--step-3);
+    font-weight: 800;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+  .desc {
+    margin: 0.9rem 0 0;
+    font-size: var(--step-1);
+    color: var(--muted);
+    max-width: var(--measure);
+    line-height: 1.5;
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin: 1.75rem 0 0;
+  }
+  .facts dt {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .facts dd {
+    margin: 0.1rem 0 0;
+    font-weight: 600;
+  }
+  .story:not(:empty) {
+    margin-bottom: 2.5rem;
+  }
+  .muted {
+    color: var(--muted);
+  }
+</style>

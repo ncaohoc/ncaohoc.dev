@@ -1,0 +1,52 @@
+---
+import { formatDate } from '../site';
+
+interface Item {
+  href: string;
+  title: string;
+  description?: string;
+  date?: Date;
+  meta?: string;
+  status?: string;
+  tags?: string[];
+}
+interface Props {
+  items: Item[];
+  empty?: string;
+}
+const { items, empty = 'Chưa có gì ở đây. Sắp có.' } = Astro.props;
+---
+
+{
+  items.length === 0 ? (
+    <p class="empty">{empty}</p>
+  ) : (
+    <ul class="entries">
+      {items.map((i) => (
+        <li class="entry">
+          <a href={i.href}>{i.title}</a>
+          {i.status ? (
+            <span class="meta status" data-status={i.status}>{i.status}</span>
+          ) : i.date ? (
+            <time datetime={i.date.toISOString()}>{formatDate(i.date)}</time>
+          ) : i.meta ? (
+            <span class="meta">{i.meta}</span>
+          ) : null}
+          {i.description && <p>{i.description}</p>}
+          {i.tags && i.tags.length > 0 && (
+            <ul class="tags" aria-label="Thẻ">
+              {i.tags.map((t) => <li>{t}</li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .empty {
+    color: var(--muted);
+    margin: 0;
+  }
+</style>

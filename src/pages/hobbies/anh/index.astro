@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import AlbumGrid from '../../../components/AlbumGrid.astro';
+import { published } from '../../../site';
+
+const albums = published(await getCollection('albums'));
+---
+
+<Base title="Ảnh" description="Các album ảnh mình chụp, chia theo chủ đề.">
+  <div class="wrap">
+    <header class="page-head">
+      <a class="back" href="/hobbies/">Sở thích</a>
+      <h1>Ảnh</h1>
+      <p>Mỗi album là một chuyến đi hoặc một chủ đề chụp. Bấm vào album để xem toàn bộ ảnh.</p>
+    </header>
+    {
+      albums.length > 0 ? (
+        <AlbumGrid albums={albums} filters />
+      ) : (
+        <p class="muted">Chưa có album nào.</p>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .back {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    color: var(--muted);
+    font-size: var(--step--1);
+    text-decoration: none;
+  }
+  .back::before {
+    content: '‹ ';
+  }
+  .muted {
+    color: var(--muted);
+  }
+</style>

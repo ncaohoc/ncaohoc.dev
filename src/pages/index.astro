@@ -1,0 +1,178 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Seal from '../components/Seal.astro';
+import EntryList from '../components/EntryList.astro';
+import { SITE, published } from '../site';
+import AlbumGrid from '../components/AlbumGrid.astro';
+
+const posts = published(await getCollection('blog')).slice(0, 5);
+const sheets = published(await getCollection('cheatsheets')).slice(0, 6);
+const projects = published(await getCollection('projects'))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
+const hobbies = published(await getCollection('hobbies')).slice(0, 3);
+const albums = published(await getCollection('albums')).slice(0, 3);
+---
+
+<Base>
+  <section class="hero wrap">
+    <div class="hero-text">
+      <h1>{SITE.fullName}</h1>
+      <p class="lede">
+        Mình là Unity game developer ở Sài Gòn. Từng làm gameplay cho game fitness nhiều máy tại Aviron, giờ đang
+        tự làm một game kinh dị 2D và học shader từ gốc.
+      </p>
+      <p class="lede">
+        Ở đây mình ghi lại những gì học được, những cheatsheet hay mở lại, và tiến độ các dự án riêng.
+      </p>
+      <p class="hero-links">
+        <a href="/cv/" class="btn">Xem CV</a>
+        <a href="/blog/">Đọc blog</a>
+      </p>
+    </div>
+    <div class="hero-seal" aria-hidden="true">
+      <Seal size={260} id="hero" class="stamp" worn />
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="section">
+      <h2><a href="/blog/">Bài viết mới</a><small>Ghi chép, devlog, suy nghĩ</small></h2>
+      <EntryList
+        items={posts.map((p) => ({
+          href: `/blog/${p.id}/`,
+          title: p.data.title,
+          description: p.data.description,
+          date: p.data.date,
+        }))}
+      />
+    </section>
+
+    <section class="section">
+      <h2><a href="/projects/">Dự án</a><small>Đang làm và đã xong</small></h2>
+      <EntryList
+        items={projects.map((p) => ({
+          href: `/projects/${p.id}/`,
+          title: p.data.title,
+          description: p.data.description,
+          status: p.data.status,
+          tags: p.data.stack,
+        }))}
+      />
+    </section>
+
+    {
+      (albums.length > 0 || hobbies.length > 0) && (
+        <section class="section">
+          <h2><a href="/hobbies/">Sở thích</a><small>Album ảnh, mô hình</small></h2>
+          <div class="hobby-col">
+            {albums.length > 0 && <AlbumGrid albums={albums} />}
+            {hobbies.length > 0 && (
+              <EntryList
+                items={hobbies.map((h) => ({
+                  href: `/hobbies/${h.id}/`,
+                  title: h.data.title,
+                  description: h.data.description,
+                  meta: h.data.category,
+                }))}
+              />
+            )}
+          </div>
+        </section>
+      )
+    }
+
+    <section class="section">
+      <h2><a href="/cheatsheets/">Cheatsheet</a><small>Tra nhanh khi cần</small></h2>
+      <EntryList
+        items={sheets.map((s) => ({
+          href: `/cheatsheets/${s.id}/`,
+          title: s.data.title,
+          description: s.data.description,
+          tags: s.data.tags,
+        }))}
+      />
+    </section>
+  </div>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 2rem 4rem;
+    padding-block: clamp(2.5rem, 8vw, 6rem) clamp(2.5rem, 6vw, 4.5rem);
+  }
+  h1 {
+    font-size: var(--step-4);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    max-width: 11ch;
+    text-wrap: balance;
+  }
+  .lede {
+    max-width: 36rem;
+    margin: 1.25rem 0 0;
+    font-size: var(--step-1);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+  .lede + .lede {
+    margin-top: 0.75rem;
+  }
+  .hero-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 2rem 0 0;
+    font-weight: 600;
+  }
+  .btn {
+    display: inline-block;
+    padding: 0.65rem 1.3rem;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    border-radius: 6px;
+  }
+  .btn:hover {
+    background: var(--seal);
+  }
+  .hobby-col {
+    display: grid;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+  .hero-seal {
+    padding-right: 1rem;
+  }
+  .hero-seal :global(.stamp) {
+    transform: rotate(-5deg);
+    animation: stamp 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.25s both;
+  }
+  @keyframes stamp {
+    from {
+      transform: rotate(-12deg) scale(1.35);
+      opacity: 0;
+    }
+    to {
+      transform: rotate(-5deg) scale(1);
+      opacity: 1;
+    }
+  }
+  @media (max-width: 760px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+    .hero-seal {
+      order: -1;
+    }
+    .hero-seal :global(.stamp) {
+      height: 120px;
+      width: 72px;
+    }
+  }
+</style>

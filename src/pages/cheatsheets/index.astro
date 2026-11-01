@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+import { published } from '../../site';
+
+const sheets = published(await getCollection('cheatsheets'));
+---
+
+<Base title="Cheatsheet" description="Bảng tra nhanh về Unity, shader, Linux và những thứ mình hay quên.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1>Cheatsheet</h1>
+      <p>Bảng tra nhanh cho những thứ mình hay phải mở lại: Unity, shader, Linux, Docker, tiếng Anh.</p>
+    </header>
+    <EntryList
+      items={sheets.map((s) => ({
+        href: `/cheatsheets/${s.id}/`,
+        title: s.data.title,
+        description: s.data.description,
+        date: s.data.updated ?? s.data.date,
+        tags: s.data.tags,
+      }))}
+    />
+  </div>
+</Base>

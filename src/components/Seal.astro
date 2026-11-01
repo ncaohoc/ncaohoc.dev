@@ -1,0 +1,64 @@
+---
+// Con dấu đỏ kiểu ấn triện: chữ 高學 khắc âm (chữ trắng trên nền đỏ).
+// Dùng cho logo ở header và điểm nhấn ở trang chủ.
+import { SITE } from '../site';
+
+interface Props {
+  size?: number; // chiều cao px
+  id: string; // id riêng cho filter SVG
+  class?: string;
+  worn?: boolean; // vết mực loang, chỉ đẹp khi dấu to
+}
+const { size = 40, id, class: className, worn = false } = Astro.props;
+const [a, b] = Array.from(SITE.seal);
+---
+
+<svg
+  class:list={['seal', className]}
+  viewBox="0 0 72 120"
+  height={size}
+  width={(size * 72) / 120}
+  role="img"
+  aria-label={`Con dấu ${SITE.seal} (${SITE.name})`}
+>
+  <defs>
+    <filter id={`ink-${id}`} x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale={worn ? 2.4 : 1.2} xChannelSelector="R" yChannelSelector="G" result="rough" />
+      {
+        worn && (
+          <>
+            <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="3" result="blot" />
+            <feColorMatrix in="blot" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.85" result="mask" />
+            <feComposite in="rough" in2="mask" operator="in" />
+          </>
+        )
+      }
+    </filter>
+  </defs>
+  <g filter={`url(#ink-${id})`}>
+    <rect x="2" y="2" width="68" height="116" rx="5" class="seal-ink" />
+    <rect x="7" y="7" width="58" height="106" rx="2" fill="none" class="seal-cut" stroke-width="1.6" />
+    <text x="36" y="56" text-anchor="middle" class="seal-glyph">{a}</text>
+    <text x="36" y="104" text-anchor="middle" class="seal-glyph">{b}</text>
+  </g>
+</svg>
+
+<style>
+  .seal {
+    display: block;
+    flex: none;
+  }
+  .seal-ink {
+    fill: var(--seal);
+  }
+  .seal-cut {
+    stroke: var(--seal-cut);
+  }
+  .seal-glyph {
+    fill: var(--seal-cut);
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 900;
+    font-size: 44px;
+  }
+</style>

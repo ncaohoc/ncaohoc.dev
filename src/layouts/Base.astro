@@ -1,0 +1,237 @@
+---
+import '../styles/global.css';
+import Seal from '../components/Seal.astro';
+import { SITE, NAV } from '../site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  type?: 'website' | 'article';
+}
+const { title, description = SITE.description, type = 'website' } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE.name}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const path = Astro.url.pathname;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="vi_VN" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <!-- Chỉ tải đúng 2 chữ của con dấu, không tải cả bộ font CJK -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&text=%E9%AB%98%E5%AD%B8&display=block"
+    />
+
+    <script is:inline>
+      (() => {
+        let t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip visually-hidden" href="#main">Bỏ qua tới nội dung</a>
+    <header class="site-header wrap">
+      <a href="/" class="brand" aria-label="Trang chủ">
+        <Seal size={44} id="header" />
+        <span class="brand-name">{SITE.name}</span>
+      </a>
+      <nav aria-label="Chính">
+        <ul>
+          {
+            NAV.map((item) => (
+              <li>
+                <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <button class="theme-toggle" type="button" aria-label="Đổi giao diện sáng/tối">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path class="sun" d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66 1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14-1.41-1.41M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+            <path class="moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />
+          </svg>
+        </button>
+      </nav>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer wrap">
+      <p>© {year} {SITE.fullName}. Viết ở Sài Gòn.</p>
+      <ul>
+        <li><a href="/rss.xml">RSS</a></li>
+        <li><a href="/cv/">CV</a></li>
+      </ul>
+    </footer>
+
+    <script is:inline>
+      document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip:focus {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    height: auto;
+    clip: auto;
+    padding: 0.5rem 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    z-index: 10;
+  }
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1.25rem;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .brand-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  nav ul {
+    display: flex;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    display: block;
+    padding: 0.35rem 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 6px;
+  }
+  nav a:hover {
+    color: var(--ink);
+  }
+  nav a[aria-current='page'] {
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--seal);
+    border-radius: 0;
+  }
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .theme-toggle path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  :global([data-theme='dark']) .sun,
+  :global([data-theme='light']) .moon {
+    display: none;
+  }
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 5rem;
+    padding-block: 2rem 3rem;
+    background: linear-gradient(var(--rule), var(--rule)) no-repeat var(--gutter) 0 / calc(100% - 2 * var(--gutter)) 1px;
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+  .site-footer p {
+    margin: 0;
+  }
+  .site-footer ul {
+    display: flex;
+    gap: 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-footer a {
+    color: var(--muted);
+  }
+  @media (max-width: 640px) {
+    .site-header {
+      flex-wrap: wrap;
+      padding-bottom: 0.5rem;
+    }
+    nav {
+      order: 3;
+      width: 100%;
+      margin-inline: -0.5rem;
+    }
+    nav ul {
+      flex: 1;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav a {
+      padding: 0.35rem 0.5rem;
+      white-space: nowrap;
+    }
+  }
+</style>

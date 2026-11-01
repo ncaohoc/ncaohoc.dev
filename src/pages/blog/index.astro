@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+import { published } from '../../site';
+
+const posts = published(await getCollection('blog'));
+---
+
+<Base title="Blog" description="Ghi chép, devlog và những điều mình học được.">
+  <div class="wrap">
+    <header class="page-head">
+      <h1>Blog</h1>
+      <p>Ghi chép, devlog và những điều mình học được khi làm game.</p>
+    </header>
+    <EntryList
+      items={posts.map((p) => ({
+        href: `/blog/${p.id}/`,
+        title: p.data.title,
+        description: p.data.description,
+        date: p.data.date,
+        tags: p.data.tags,
+      }))}
+    />
+  </div>
+</Base>

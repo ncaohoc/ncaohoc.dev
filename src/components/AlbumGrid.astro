@@ -1,0 +1,158 @@
+---
+// Lưới album: ảnh bìa, tên, máy, số ảnh. Có thể bật bộ lọc theo máy.
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { albumSlug, albumPhotos, albumCover } from '../lib/albums';
+import { formatDate, slugify } from '../site';
+
+interface Props {
+  albums: CollectionEntry<'albums'>[];
+  filters?: boolean;
+}
+const { albums, filters = false } = Astro.props;
+
+const cameras = [...new Set(albums.map((a) => a.data.camera).filter(Boolean))] as string[];
+---
+
+<div class="albums" data-albums>
+  {
+    filters && cameras.length > 1 && (
+      <div class="filters" role="group" aria-label="Lọc theo máy ảnh">
+        <button type="button" data-filter="" aria-pressed="true">Tất cả</button>
+        {cameras.map((c) => (
+          <button type="button" data-filter={slugify(c)} aria-pressed="false">
+            {c}
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  <ul class="grid">
+    {
+      albums.map((a) => {
+        const cover = albumCover(a);
+        const count = albumPhotos(a).length;
+        return (
+          <li data-cam={a.data.camera ? slugify(a.data.camera) : ''}>
+            <a href={`/hobbies/anh/${albumSlug(a)}/`}>
+              <div class="cover">
+                {cover ? (
+                  <Image
+                    src={cover.img}
+                    alt=""
+                    widths={cover.img.width > 500 ? [500, 900].filter((w) => w <= cover.img.width) : [cover.img.width]}
+                    sizes="(max-width: 640px) 100vw, 340px"
+                    loading="lazy"
+                    format="webp"
+                  />
+                ) : (
+                  <span class="nocover">Chưa có ảnh</span>
+                )}
+              </div>
+              <h3>{a.data.title}</h3>
+            </a>
+            <p class="meta">
+              {a.data.camera && <span>{a.data.camera}</span>}
+              <span>{count} ảnh</span>
+              <time datetime={a.data.date.toISOString()}>{formatDate(a.data.date)}</time>
+            </p>
+          </li>
+        );
+      })
+    }
+  </ul>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-albums]').forEach((root) => {
+    const buttons = root.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    buttons.forEach((b) =>
+      b.addEventListener('click', () => {
+        const f = b.dataset.filter;
+        buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        root.querySelectorAll<HTMLElement>('li[data-cam]').forEach((li) => {
+          li.hidden = !!f && li.dataset.cam !== f;
+        });
+      }),
+    );
+  });
+</script>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .filters button {
+    font: inherit;
+    font-size: var(--step--1);
+    font-weight: 500;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .filters button[aria-pressed='true'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: 2rem 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .grid li[hidden] {
+    display: none;
+  }
+  .grid a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .cover {
+    aspect-ratio: 3 / 2;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--rule);
+    display: grid;
+    place-items: center;
+  }
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .grid a:hover .cover img {
+    transform: scale(1.03);
+  }
+  .nocover {
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+  h3 {
+    margin-top: 0.7rem;
+    font-size: var(--step-1);
+    font-weight: 700;
+  }
+  .grid a:hover h3 {
+    color: var(--jade);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 1rem;
+    margin: 0.3rem 0 0;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+</style>
