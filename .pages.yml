@@ -1,0 +1,293 @@
+# Cấu hình Pages CMS (https://pagescms.org): form để thêm/sửa bài ngay trên trình duyệt.
+# Mỗi lần bấm lưu, Pages CMS tạo một commit lên GitHub, Cloudflare tự build lại site.
+#
+# Ảnh tải lên nằm trong src/assets/uploads/. Đường dẫn ghi vào bài là ../../assets/uploads/<tên-file>,
+# tính từ file bài viết (src/content/<mục>/<bài>.md), để Astro tự nén và tạo nhiều cỡ ảnh khi build.
+
+media:
+  input: src/assets/uploads
+  output: ../../assets/uploads
+  categories: [image]
+
+content:
+  - name: blog
+    label: Blog
+    type: collection
+    path: src/content/blog
+    exclude: [.gitkeep]
+    filename:
+      template: "{primary}.md"
+      field: create
+    view:
+      fields: [title, date, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Tiêu đề
+        type: string
+        required: true
+      - name: description
+        label: Mô tả ngắn
+        type: text
+        required: true
+      - name: date
+        label: Ngày đăng
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: updated
+        label: Ngày cập nhật
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: tags
+        label: Thẻ
+        type: string
+        list: true
+      - name: draft
+        label: Bản nháp (chưa hiện trên site)
+        type: boolean
+        default: false
+      - name: body
+        label: Nội dung
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: cheatsheets
+    label: Cheatsheet
+    type: collection
+    path: src/content/cheatsheets
+    exclude: [.gitkeep]
+    filename:
+      template: "{primary}.md"
+      field: create
+    view:
+      fields: [title, date, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Tiêu đề
+        type: string
+        required: true
+      - name: description
+        label: Mô tả ngắn
+        type: text
+        required: true
+      - name: date
+        label: Ngày đăng
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: updated
+        label: Ngày cập nhật
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: tags
+        label: Thẻ
+        type: string
+        list: true
+      - name: draft
+        label: Bản nháp (chưa hiện trên site)
+        type: boolean
+        default: false
+      # Cheatsheet nhiều bảng và code nên sửa thẳng Markdown, tránh trình soạn thảo làm lệch định dạng
+      - name: body
+        label: Nội dung (Markdown, mỗi mục bắt đầu bằng ##)
+        type: code
+        options:
+          format: markdown
+
+  - name: projects
+    label: Dự án
+    type: collection
+    path: src/content/projects
+    exclude: [.gitkeep]
+    filename:
+      template: "{primary}.md"
+      field: create
+    view:
+      fields: [title, status, order]
+      primary: title
+      sort: [order, date, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: title
+        label: Tên dự án
+        type: string
+        required: true
+      - name: description
+        label: Mô tả ngắn
+        type: text
+        required: true
+      - name: date
+        label: Ngày
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: status
+        label: Trạng thái
+        type: select
+        options:
+          values: [Đang làm, Hoàn thành, Tạm dừng]
+      - name: stack
+        label: Công nghệ
+        type: string
+        list: true
+      - name: repo
+        label: Link repo
+        type: string
+      - name: link
+        label: Link sản phẩm
+        type: string
+      - name: order
+        label: Thứ tự (số nhỏ xếp trước)
+        type: number
+      - name: tags
+        label: Thẻ
+        type: string
+        list: true
+      - name: draft
+        label: Bản nháp (chưa hiện trên site)
+        type: boolean
+        default: false
+      - name: body
+        label: Nội dung
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: hobbies
+    label: Sở thích
+    type: collection
+    path: src/content/hobbies
+    exclude: [.gitkeep]
+    filename:
+      template: "{primary}.md"
+      field: create
+    view:
+      fields: [title, category, date, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Tiêu đề
+        type: string
+        required: true
+      - name: description
+        label: Mô tả ngắn
+        type: text
+        required: true
+      - name: date
+        label: Ngày đăng
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: category
+        label: Chủ đề
+        description: Ví dụ Nhiếp ảnh, Mô hình. Mỗi chủ đề tự thành một mục trên trang Sở thích.
+        type: string
+        required: true
+      - name: gear
+        label: Dụng cụ (máy ảnh, ống kính, kit...)
+        type: string
+        list: true
+      - name: cover
+        label: Ảnh bìa
+        type: image
+      - name: tags
+        label: Thẻ
+        type: string
+        list: true
+      - name: draft
+        label: Bản nháp (chưa hiện trên site)
+        type: boolean
+        default: false
+      - name: body
+        label: Nội dung
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: albums
+    label: Album ảnh
+    type: collection
+    path: src/content/albums
+    exclude: [.gitkeep]
+    filename:
+      template: "{primary}.md"
+      field: create
+    view:
+      fields: [title, camera, date, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Tên album
+        type: string
+        required: true
+      - name: description
+        label: Mô tả ngắn
+        type: text
+      - name: date
+        label: Ngày
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: camera
+        label: Máy ảnh
+        description: Ghi tự do, ví dụ Fujifilm X-T50. Trang Ảnh tự tạo nút lọc theo các máy đã ghi.
+        type: string
+      - name: lens
+        label: Ống kính
+        type: string
+      - name: location
+        label: Địa điểm
+        type: string
+      - name: photos
+        label: Ảnh
+        description: Xếp theo thứ tự hiển thị. Tên file thành chú thích (01-cau-thu-thiem.jpg -> "cau thu thiem"). Nên xuất ảnh 2500–3000px cạnh dài.
+        type: image
+        options:
+          multiple:
+            max: 300
+      - name: cover
+        label: Ảnh bìa (bỏ trống thì lấy ảnh đầu tiên)
+        type: image
+      - name: tags
+        label: Thẻ
+        type: string
+        list: true
+      - name: draft
+        label: Bản nháp (chưa hiện trên site)
+        type: boolean
+        default: false
+      - name: body
+        label: Câu chuyện của album
+        type: rich-text
+        options:
+          format: markdown

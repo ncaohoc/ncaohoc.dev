@@ -37,7 +37,16 @@ draft: true        # bỏ dòng này khi muốn đăng
 
 Dự án có thêm `status` (`Đang làm`, `Hoàn thành`, `Tạm dừng`), `stack`, `repo`, `link` và `order` (số nhỏ xếp trước).
 
-Cheatsheet tự chia thành 2 cột theo từng mục `##`, nên mỗi mục nên ngắn và độc lập.
+Cheatsheet có mục lục bên trái lấy từ các mục `##`, nên mỗi mục nên ngắn và độc lập.
+
+## Thêm bài bằng form (Pages CMS)
+
+Không muốn sửa file thì dùng [Pages CMS](https://app.pagescms.org): đăng nhập bằng GitHub, chọn repo `ncaohoc/ncaohoc.dev`, rồi thêm hoặc sửa bài bằng form. Cấu hình nằm trong `.pages.yml`.
+
+- Mỗi lần bấm lưu, Pages CMS tạo một commit trên `main`, Cloudflare tự build lại site sau 1–2 phút.
+- Ô "Tên file" khi tạo bài chính là đường dẫn. Nên sửa thành chữ không dấu, nối bằng gạch ngang, ví dụ `sai-gon-mua-mua`.
+- Ảnh tải lên nằm trong `src/assets/uploads/`.
+- Tick "Bản nháp" thì bài chưa hiện trên site.
 
 ## Sở thích và ảnh
 
@@ -46,22 +55,14 @@ Bài về sở thích nằm trong `src/content/hobbies/`, frontmatter có thêm:
 ```yaml
 category: Nhiếp ảnh      # hoặc Mô hình... mỗi chủ đề tự thành một mục
 gear: [OM-3, 12-45mm]    # máy, ống kính, kit...
-cover: ./anh-bia.jpg     # tuỳ chọn, ảnh để cùng thư mục với bài
+cover: ../../assets/uploads/anh-bia.jpg   # tuỳ chọn
 ```
+
+Ảnh dùng trong bài và ảnh bìa để trong `src/assets/uploads/`, ghi đường dẫn tương đối từ file bài: `../../assets/uploads/<tên-file>`.
 
 ### Album ảnh
 
-Mỗi album là một thư mục trong `src/content/albums/`. Tên thư mục là đường dẫn của album:
-
-```
-src/content/albums/sai-gon-mua-mua/
-├── index.md              -> /hobbies/anh/sai-gon-mua-mua/
-├── 01-cau-thu-thiem.jpg
-├── 02-ben-xe-buyt.jpg
-└── DSCF4410.jpg
-```
-
-Tạo album mới: copy thư mục `vi-du-album`, đổi tên, sửa `index.md`, thả ảnh vào.
+Mỗi album là một file trong `src/content/albums/`. Tên file là đường dẫn của album: `sai-gon-mua-mua.md` -> `/hobbies/anh/sai-gon-mua-mua/`. Ảnh để trong `src/assets/uploads/` và liệt kê trong `photos`:
 
 ```yaml
 title: Sài Gòn mùa mưa
@@ -70,13 +71,17 @@ date: 2026-10-20
 camera: Fujifilm X-T50   # ghi tự do; trang Ảnh tự tạo nút lọc theo các máy đã ghi
 lens: XF 27mm f/2.8      # tuỳ chọn
 location: Quận 1         # tuỳ chọn
-cover: 02-ben-xe-buyt.jpg  # tuỳ chọn, mặc định ảnh đầu tiên
+photos:
+  - ../../assets/uploads/01-cau-thu-thiem.jpg
+  - ../../assets/uploads/02-ben-xe-buyt.jpg
+  - ../../assets/uploads/DSCF4410.jpg
+cover: ../../assets/uploads/02-ben-xe-buyt.jpg  # tuỳ chọn, mặc định ảnh đầu tiên
 ```
 
-- Ảnh xếp theo tên file, nên đánh số `01-`, `02-` để tự sắp thứ tự.
-- Phần sau số thành chú thích: `01-cau-thu-thiem.jpg` hiện là "cau thu thiem". Giữ tên gốc của máy (DSCF4410.jpg) thì không có chú thích.
+- Ảnh hiện theo đúng thứ tự trong `photos`.
+- Tên file thành chú thích: `01-cau-thu-thiem.jpg` hiện là "cau thu thiem". Giữ tên gốc của máy (DSCF4410.jpg) thì không có chú thích.
 - Một album trộn nhiều máy cũng được, ghi `camera: X-T50, OM-3`.
-- Site tự nén và tạo nhiều cỡ ảnh khi build. Dù vậy nên xuất ảnh khoảng 2500–3000px cạnh dài trước khi thả vào, để repo không phình to và build nhanh hơn.
+- Site tự nén và tạo nhiều cỡ ảnh khi build. Dù vậy nên xuất ảnh khoảng 2500–3000px cạnh dài trước khi tải lên, để repo không phình to và build nhanh hơn.
 
 ## Sửa CV
 
