@@ -1,6 +1,9 @@
 ---
-// Con dấu đỏ kiểu ấn triện: chữ 高學 khắc âm (chữ trắng trên nền đỏ).
-// Dùng cho logo ở header và điểm nhấn ở trang chủ.
+// Con dấu đỏ kiểu ấn triện, chữ khắc âm (chữ trắng trên nền đỏ).
+// variant:
+//   'square'   dấu vuông, hai chữ nằm ngang đọc từ phải sang trái: 高 bên phải, 學 bên trái
+//   'vertical' (mặc định) dấu chữ nhật đứng, 高 trên 學 dưới
+//   'single'   dấu vuông một chữ 學 (Học)
 import { SITE } from '../site';
 
 interface Props {
@@ -8,18 +11,22 @@ interface Props {
   id: string; // id riêng cho filter SVG
   class?: string;
   worn?: boolean; // vết mực loang, chỉ đẹp khi dấu to
+  variant?: 'square' | 'vertical' | 'single';
 }
-const { size = 40, id, class: className, worn = false } = Astro.props;
+const { size = 40, id, class: className, worn = false, variant = 'vertical' } = Astro.props;
 const [a, b] = Array.from(SITE.seal);
+const w = variant === 'vertical' ? 72 : 100;
+const h = variant === 'vertical' ? 120 : 100;
+const label = variant === 'single' ? b : SITE.seal;
 ---
 
 <svg
   class:list={['seal', className]}
-  viewBox="0 0 72 120"
+  viewBox={`0 0 ${w} ${h}`}
   height={size}
-  width={(size * 72) / 120}
+  width={(size * w) / h}
   role="img"
-  aria-label={`Con dấu ${SITE.seal} (${SITE.name})`}
+  aria-label={`Con dấu ${label} (${SITE.name})`}
 >
   <defs>
     <filter id={`ink-${id}`} x="-5%" y="-5%" width="110%" height="110%">
@@ -37,10 +44,30 @@ const [a, b] = Array.from(SITE.seal);
     </filter>
   </defs>
   <g filter={`url(#ink-${id})`}>
-    <rect x="2" y="2" width="68" height="116" rx="5" class="seal-ink" />
-    <rect x="7" y="7" width="58" height="106" rx="2" fill="none" class="seal-cut" stroke-width="1.6" />
-    <text x="36" y="56" text-anchor="middle" class="seal-glyph">{a}</text>
-    <text x="36" y="104" text-anchor="middle" class="seal-glyph">{b}</text>
+    <rect x="2" y="2" width={w - 4} height={h - 4} rx="5" class="seal-ink" />
+    <rect x="7" y="7" width={w - 14} height={h - 14} rx="2" fill="none" class="seal-cut" stroke-width="1.6" />
+    {
+      variant === 'vertical' && (
+        <>
+          <text x="36" y="56" text-anchor="middle" font-size="44" class="seal-glyph">{a}</text>
+          <text x="36" y="104" text-anchor="middle" font-size="44" class="seal-glyph">{b}</text>
+        </>
+      )
+    }
+    {
+      variant === 'square' && (
+        <>
+          <line x1="50" y1="14" x2="50" y2="86" class="seal-cut" stroke-width="1.2" />
+          <text x="72" y="65" text-anchor="middle" font-size="40" class="seal-glyph">{a}</text>
+          <text x="28" y="65" text-anchor="middle" font-size="40" class="seal-glyph">{b}</text>
+        </>
+      )
+    }
+    {
+      variant === 'single' && (
+        <text x="50" y="71" text-anchor="middle" font-size="62" class="seal-glyph">{b}</text>
+      )
+    }
   </g>
 </svg>
 
@@ -59,6 +86,5 @@ const [a, b] = Array.from(SITE.seal);
     fill: var(--seal-cut);
     font-family: 'Noto Serif TC', serif;
     font-weight: 900;
-    font-size: 44px;
   }
 </style>

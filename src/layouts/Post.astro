@@ -11,11 +11,13 @@ interface Props {
   updated?: Date;
   tags?: string[];
   back: { href: string; label: string };
-  wide?: boolean; // cheatsheet dùng bố cục nhiều cột
+  wide?: boolean; // cheatsheet: bố cục rộng + mục lục bên trái
   aside?: { label: string; value: string; href?: string }[];
   cover?: ImageMetadata;
+  headings?: { depth: number; slug: string; text: string }[];
 }
-const { title, description, date, updated, tags = [], back, wide = false, aside = [], cover } = Astro.props;
+const { title, description, date, updated, tags = [], back, wide = false, aside = [], cover, headings = [] } = Astro.props;
+const toc = headings.filter((h) => h.depth === 2);
 ---
 
 <Base title={title} description={description} type="article">
@@ -55,11 +57,94 @@ const { title, description, date, updated, tags = [], back, wide = false, aside 
         </figure>
       )
     }
-    <div class:list={['prose', { sheet: wide }]}>
-      <slot />
-    </div>
+    {
+      wide && toc.length > 2 ? (
+        <div class="sheet-layout">
+          <nav class="toc" aria-label="Mục lục" data-toc>
+            <p>Mục lục</p>
+            <ol>
+              <span class="toc-marker" aria-hidden="true"></span>
+              {toc.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`} data-slug={h.slug}>{h.text.replace(/^\d+(\.\d+)*\.?\s+/, '')}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+          <div class="prose sheet">
+            <slot />
+          </div>
+        </div>
+      ) : (
+        <div class:list={['prose', { sheet: wide }]}>
+          <slot />
+        </div>
+      )
+    }
   </article>
 </Base>
+
+<script>
+  // Mục lục chạy theo: đánh dấu mục h2 đang đọc, vạch đỏ trượt theo.
+  const toc = document.querySelector<HTMLElement>('[data-toc]');
+  if (toc) {
+    const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('a[data-slug]'));
+    const marker = toc.querySelector<HTMLElement>('.toc-marker')!;
+    const sections = links
+      .map((a) => document.getElementById(a.dataset.slug!))
+      .filter((el): el is HTMLElement => !!el);
+    let current = -1;
+
+    const setActive = (i: number) => {
+      if (i === current) return;
+      current = i;
+      links.forEach((a, j) => a.toggleAttribute('aria-current', j === i));
+      const a = links[i];
+      if (!a) {
+        marker.style.opacity = '0';
+        return;
+      }
+      marker.style.opacity = '1';
+      marker.style.transform = `translateY(${a.offsetTop}px)`;
+      marker.style.height = `${a.offsetHeight}px`;
+      // giữ mục đang đọc luôn trong khung khi mục lục dài hơn màn hình
+      const box = toc.getBoundingClientRect();
+      const r = a.getBoundingClientRect();
+      if (r.top < box.top + 40 || r.bottom > box.bottom - 40) {
+        toc.scrollTo({ top: a.offsetTop - toc.clientHeight / 3, behavior: 'smooth' });
+      }
+    };
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const line = window.innerHeight * 0.3;
+      let idx = -1;
+      for (let i = 0; i < sections.length; i++) {
+        if (sections[i].getBoundingClientRect().top <= line) idx = i;
+        else break;
+      }
+      // cuộn tới cuối trang thì chọn mục cuối
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+        idx = sections.length - 1;
+      }
+      setActive(idx);
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => {
+      const i = current;
+      current = -1;
+      setActive(i);
+    });
+    update();
+  }
+</script>
 
 <style>
   .post-head {
@@ -126,31 +211,114 @@ const { title, description, date, updated, tags = [], back, wide = false, aside 
     font-weight: 600;
   }
 
-  /* Cheatsheet: chia cột theo từng mục h2 */
+  /* Cheatsheet: nội dung rộng hơn, mục lục dính bên trái trên màn hình lớn */
+  .sheet-layout {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  .toc {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    font-size: var(--step--1);
+  }
+  .toc p {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+  }
+  .toc ol {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: toc;
+    border-left: 1px solid var(--rule);
+  }
+  .toc-marker {
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 2px;
+    height: 0;
+    background: var(--seal);
+    border-radius: 2px;
+    opacity: 0;
+    transition:
+      transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1),
+      height 0.3s cubic-bezier(0.3, 0.7, 0.3, 1),
+      opacity 0.2s;
+    pointer-events: none;
+  }
+  .toc li {
+    counter-increment: toc;
+  }
+  .toc a {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.3rem 0 0.3rem 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    line-height: 1.35;
+  }
+  .toc a::before {
+    content: counter(toc);
+    min-width: 1.1rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.6;
+  }
+  .toc a {
+    transition: color 0.2s;
+  }
+  .toc a:hover {
+    color: var(--ink);
+  }
+  .toc a[aria-current] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .toc a[aria-current]::before {
+    color: var(--seal);
+    opacity: 1;
+  }
   .sheet {
-    max-width: none;
-    columns: 2 26rem;
-    column-gap: 3rem;
+    max-width: 52rem;
   }
   .sheet :global(h2) {
-    break-after: avoid;
-    font-size: var(--step-1);
-    margin-top: 0;
-    padding-top: 1.75rem;
+    font-size: var(--step-2);
+    margin-top: 2.75em;
+    padding-top: 1.25rem;
     border-top: 2px solid var(--ink);
+    scroll-margin-top: 1rem;
   }
   .sheet :global(h2:first-child) {
-    padding-top: 0.75rem;
+    margin-top: 0;
   }
-  .sheet :global(pre),
-  .sheet :global(table),
-  .sheet :global(li) {
-    break-inside: avoid;
+  .sheet :global(h3) {
+    scroll-margin-top: 1rem;
   }
-  .sheet > :global(*) {
-    margin-top: 0.75rem;
+  .sheet :global(td code),
+  .sheet :global(th code) {
+    white-space: nowrap;
   }
-  .sheet :global(table) {
-    display: table;
+  @media (max-width: 900px) {
+    .sheet-layout {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .toc {
+      position: static;
+      max-height: none;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .toc ol {
+      columns: 2 12rem;
+    }
+    .toc-marker {
+      display: none;
+    }
   }
 </style>

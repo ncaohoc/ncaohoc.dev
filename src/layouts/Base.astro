@@ -1,7 +1,8 @@
 ---
 import '../styles/global.css';
 import Seal from '../components/Seal.astro';
-import { SITE, NAV } from '../site';
+import { getCollection } from 'astro:content';
+import { SITE, NAV, published } from '../site';
 
 interface Props {
   title?: string;
@@ -13,6 +14,11 @@ const pageTitle = title ? `${title} · ${SITE.name}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const path = Astro.url.pathname;
 const year = new Date().getFullYear();
+
+// Ẩn mục "Sở thích" khỏi menu khi chưa có bài hoặc album nào đã đăng
+const hobbyCount =
+  published(await getCollection('hobbies')).length + published(await getCollection('albums')).length;
+const nav = NAV.filter((item) => item.href !== '/hobbies/' || hobbyCount > 0);
 ---
 
 <!doctype html>
@@ -66,7 +72,7 @@ const year = new Date().getFullYear();
       <nav aria-label="Chính">
         <ul>
           {
-            NAV.map((item) => (
+            nav.map((item) => (
               <li>
                 <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>
                   {item.label}

@@ -11,7 +11,7 @@ Mình là Cao Học, làm Unity game developer. Sau một thời gian chỉ ghi 
 
 - **Blog**: ghi chép khi học, devlog game, những vấn đề gặp phải lúc làm việc và cách giải quyết.
 - **Cheatsheet**: bảng tra nhanh về Unity, shader, Linux, Docker. Đây là những trang mình mở lại nhiều nhất.
-- **Dự án**: tiến độ các dự án cá nhân, hiện tại là một game kinh dị 2D và home server tự dựng.
+- **Dự án**: các dự án game cá nhân mình đang làm.
 - **CV**: bản cập nhật mới nhất, có thể in ra PDF ngay trên trang.
 
 ## Site này làm bằng gì

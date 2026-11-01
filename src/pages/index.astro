@@ -21,7 +21,7 @@ const albums = published(await getCollection('albums')).slice(0, 3);
       <h1>{SITE.fullName}</h1>
       <p class="lede">
         Mình là Unity game developer ở Sài Gòn. Từng làm gameplay cho game fitness nhiều máy tại Aviron, giờ đang
-        tự làm một game kinh dị 2D và học shader từ gốc.
+        tự phát triển game riêng và học shader từ gốc.
       </p>
       <p class="lede">
         Ở đây mình ghi lại những gì học được, những cheatsheet hay mở lại, và tiến độ các dự án riêng.
@@ -32,7 +32,7 @@ const albums = published(await getCollection('albums')).slice(0, 3);
       </p>
     </div>
     <div class="hero-seal" aria-hidden="true">
-      <Seal size={260} id="hero" class="stamp" worn />
+      <Seal size={220} id="hero" class="stamp" worn />
     </div>
   </section>
 
@@ -171,8 +171,8 @@ const albums = published(await getCollection('albums')).slice(0, 3);
       order: -1;
     }
     .hero-seal :global(.stamp) {
-      height: 120px;
-      width: 72px;
+      height: 96px;
+      width: 96px;
     }
   }
 </style>

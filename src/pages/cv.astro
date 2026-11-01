@@ -8,7 +8,8 @@ const links = cv.links.filter((l) => l.href);
 <Base title="CV" description={`${cv.name} — ${cv.role}. Curriculum vitae.`}>
   <div class="wrap">
     <div class="cv-actions">
-      <button type="button" class="print" onclick="window.print()">In / Lưu PDF</button>
+      {cv.pdf && <a class="print" href={cv.pdf} download>Tải CV (PDF)</a>}
+      <button type="button" class="print" onclick="window.print()">In trang này</button>
     </div>
 
     <article class="cv" lang="en">
@@ -19,15 +20,31 @@ const links = cv.links.filter((l) => l.href);
         </div>
         <ul class="contact">
           <li>{cv.location}</li>
+          {cv.phone && <li>{cv.phone}</li>}
           {cv.email && <li><a href={`mailto:${cv.email}`}>{cv.email}</a></li>}
-          {cv.website && <li><a href={`https://${cv.website}`}>{cv.website}</a></li>}
           {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
         </ul>
       </header>
 
       <section class="row">
-        <h2>Profile</h2>
-        <p class="summary">{cv.summary}</p>
+        <h2>Summary</h2>
+        <div class="summary">
+          {cv.summary.map((para) => <p>{para}</p>)}
+        </div>
+      </section>
+
+      <section class="row">
+        <h2>Technical skills</h2>
+        <dl class="skills">
+          {
+            cv.skills.map((s) => (
+              <div>
+                <dt>{s.group}</dt>
+                <dd>{s.items}</dd>
+              </div>
+            ))
+          }
+        </dl>
       </section>
 
       <section class="row">
@@ -42,10 +59,16 @@ const links = cv.links.filter((l) => l.href);
                   </h3>
                   {job.period && <p class="period">{job.period}</p>}
                 </div>
+                {job.intro && <p class="intro">{job.intro}</p>}
                 {job.points.length > 0 && (
                   <ul>
                     {job.points.map((p) => <li>{p}</li>)}
                   </ul>
+                )}
+                {job.links.length > 0 && (
+                  <p class="refs">
+                    {job.links.map((l) => <a href={l.href}>{l.label}</a>)}
+                  </p>
                 )}
               </div>
             ))
@@ -54,55 +77,23 @@ const links = cv.links.filter((l) => l.href);
       </section>
 
       <section class="row">
-        <h2>Projects</h2>
+        <h2>Education</h2>
         <div class="stack">
-          {
-            cv.projects.map((p) => (
-              <div>
-                <h3><a href={p.href}>{p.name}</a></h3>
-                <p class="plain">{p.text}</p>
-              </div>
-            ))
-          }
+          {cv.education.map((e) => (
+            <div class="job-head">
+              <h3>
+                {e.degree} <span>{e.school}</span>
+              </h3>
+              <p class="period">{e.period}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       <section class="row">
-        <h2>Skills</h2>
-        <dl class="skills">
-          {
-            cv.skills.map((s) => (
-              <div>
-                <dt>{s.group}</dt>
-                <dd>{s.items.join(', ')}</dd>
-              </div>
-            ))
-          }
-        </dl>
-      </section>
-
-      {
-        cv.education.length > 0 && (
-          <section class="row">
-            <h2>Education</h2>
-            <div class="stack">
-              {cv.education.map((e) => (
-                <div class="job-head">
-                  <h3>
-                    {e.degree} <span>{e.school}</span>
-                  </h3>
-                  <p class="period">{e.period}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )
-      }
-
-      <section class="row">
         <h2>Languages</h2>
         <p class="plain">
-          {cv.languages.map((l) => (l.level ? `${l.name} (${l.level})` : l.name)).join(', ')}
+          {cv.languages.map((l) => (l.level ? `${l.name}: ${l.level}.` : l.name)).join(' ')}
         </p>
       </section>
     </article>
@@ -113,6 +104,8 @@ const links = cv.links.filter((l) => l.href);
   .cv-actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     padding-top: 1.5rem;
   }
   .print {
@@ -125,6 +118,9 @@ const links = cv.links.filter((l) => l.href);
     background: var(--surface);
     color: var(--ink);
     cursor: pointer;
+  }
+  .print {
+    text-decoration: none;
   }
   .print:hover {
     border-color: var(--ink);
@@ -196,6 +192,24 @@ const links = cv.links.filter((l) => l.href);
   .plain {
     margin: 0;
   }
+  .summary {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .summary p {
+    margin: 0;
+  }
+  .intro {
+    margin: 0.4rem 0 0;
+    color: var(--muted);
+  }
+  .refs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 0.6rem 0 0;
+    font-size: var(--step--1);
+  }
   .plain {
     color: var(--muted);
   }
@@ -229,8 +243,11 @@ const links = cv.links.filter((l) => l.href);
   }
   .skills div {
     display: grid;
-    grid-template-columns: 6rem 1fr;
+    grid-template-columns: 11rem 1fr;
     gap: 1rem;
+  }
+  .skills {
+    gap: 0.55rem;
   }
   .skills dt {
     color: var(--muted);
@@ -241,6 +258,10 @@ const links = cv.links.filter((l) => l.href);
   @media (max-width: 640px) {
     .row {
       grid-template-columns: 1fr;
+    }
+    .skills div {
+      grid-template-columns: 1fr;
+      gap: 0;
     }
     .contact {
       text-align: left;
