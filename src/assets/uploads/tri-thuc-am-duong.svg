@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" font-family="'Be Vietnam Pro','Segoe UI',system-ui,sans-serif">
+  <rect width="1200" height="560" rx="24" fill="#f4f2ee"/>
+  <circle cx="600" cy="270" r="186" fill="none" stroke="#b42a22" stroke-width="2" stroke-dasharray="2 10"/>
+  <circle cx="600" cy="270" r="170" fill="#fff" stroke="#17202b" stroke-width="3"/>
+  <path d="M600 100A170 170 0 0 1 600 440A85 85 0 0 1 600 270A85 85 0 0 0 600 100Z" fill="#17202b"/>
+  <circle cx="600" cy="185" r="24" fill="#17202b"/>
+  <circle cx="600" cy="355" r="24" fill="#fff"/>
+  <g text-anchor="end">
+    <text x="370" y="210" font-size="34" font-weight="800" fill="#17202b">Giữ kín</text>
+    <text x="370" y="256" font-size="20" fill="#1d7563">giữ được người ✓</text>
+    <text x="370" y="292" font-size="20" fill="#b42a22">mất đi tri thức ✗</text>
+    <text x="370" y="336" font-size="16" fill="#5b6573">nghề gia truyền mất theo</text>
+    <text x="370" y="358" font-size="16" fill="#5b6573">người cuối cùng</text>
+  </g>
+  <g>
+    <text x="830" y="210" font-size="34" font-weight="800" fill="#17202b">Trao đi</text>
+    <text x="830" y="256" font-size="20" fill="#b42a22">✗ mất chỗ đứng</text>
+    <text x="830" y="292" font-size="20" fill="#1d7563">✓ tri thức còn mãi</text>
+    <text x="830" y="336" font-size="16" fill="#5b6573">sống tiếp bên trong</text>
+    <text x="830" y="358" font-size="16" fill="#5b6573">những cỗ máy mới</text>
+  </g>
+  <text x="600" y="512" text-anchor="middle" font-size="18" font-weight="600" letter-spacing="3" fill="#b42a22">VẬT CỰC TẤT PHẢN</text>
+</svg>

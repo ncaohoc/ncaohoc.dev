@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" font-family="'Be Vietnam Pro','Segoe UI',system-ui,sans-serif">
+  <rect width="1200" height="620" rx="24" fill="#f4f2ee"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b42a22"/></marker>
+  </defs>
+  <circle cx="600" cy="310" r="220" fill="none" stroke="#d3d8de" stroke-width="2" stroke-dasharray="3 9"/>
+  <g fill="none" stroke="#b42a22" stroke-width="4" stroke-linecap="round" marker-end="url(#a)">
+    <path d="M741.4 141.5A220 220 0 0 1 813.5 256.8"/>
+    <path d="M813.5 363.2A220 220 0 0 1 741.4 478.5"/>
+    <path d="M458.6 478.5A220 220 0 0 1 386.5 363.2"/>
+    <path d="M386.5 256.8A220 220 0 0 1 458.6 141.5"/>
+  </g>
+  <g text-anchor="middle">
+    <rect x="470" y="55" width="260" height="70" rx="14" fill="#1d7563"/>
+    <text x="600" y="86" font-size="20" font-weight="700" fill="#f4f2ee">Lập trình viên</text>
+    <text x="600" y="111" font-size="17" fill="#d5ece6">chia sẻ rộng rãi</text>
+
+    <rect x="750" y="275" width="230" height="70" rx="14" fill="#fff" stroke="#d3d8de" stroke-width="2"/>
+    <text x="865" y="306" font-size="20" font-weight="700" fill="#17202b">Kho tri thức chung</text>
+    <text x="865" y="331" font-size="17" fill="#5b6573">ngày càng dày</text>
+
+    <rect x="470" y="495" width="260" height="70" rx="14" fill="#17202b"/>
+    <text x="600" y="526" font-size="20" font-weight="700" fill="#f4f2ee">AI học từ đó</text>
+    <text x="600" y="551" font-size="17" fill="#c9d0d8">năng lực mạnh lên</text>
+
+    <rect x="220" y="275" width="230" height="70" rx="14" fill="#fff" stroke="#b42a22" stroke-width="2"/>
+    <text x="335" y="306" font-size="20" font-weight="700" fill="#b42a22">Việc lập trình</text>
+    <text x="335" y="331" font-size="17" fill="#5b6573">bị tự động hoá</text>
+
+    <text x="600" y="300" font-size="30" font-weight="800" fill="#17202b">vòng xoáy</text>
+    <text x="600" y="328" font-size="16" fill="#5b6573">nghề càng mở</text>
+    <text x="600" y="349" font-size="16" fill="#5b6573">AI càng giỏi</text>
+  </g>
+</svg>

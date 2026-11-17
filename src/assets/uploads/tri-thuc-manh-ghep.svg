@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" font-family="'Be Vietnam Pro','Segoe UI',system-ui,sans-serif">
+  <rect width="1200" height="500" rx="24" fill="#f4f2ee"/>
+  <text x="600" y="100" text-anchor="middle" font-size="30" font-weight="800" fill="#17202b">Mình sẽ là mảnh ghép nào?</text>
+
+  <!-- Thân các mảnh ghép, lỗ khuyết bên trái -->
+  <rect x="85" y="160" width="200" height="170" rx="16" fill="#5b6573"/>
+  <rect x="291" y="160" width="200" height="170" rx="16" fill="#1d7563"/>
+  <circle cx="291" cy="245" r="21" fill="#f4f2ee"/>
+  <rect x="497" y="160" width="200" height="170" rx="16" fill="#17202b"/>
+  <circle cx="497" cy="245" r="21" fill="#f4f2ee"/>
+  <rect x="703" y="160" width="200" height="170" rx="16" fill="#b42a22"/>
+  <circle cx="703" cy="245" r="21" fill="#f4f2ee"/>
+
+  <!-- Mảnh cuối còn trống -->
+  <rect x="915" y="160" width="194" height="170" rx="16" fill="none" stroke="#b42a22" stroke-width="3" stroke-dasharray="10 8"/>
+  <text x="1012" y="270" text-anchor="middle" font-size="72" font-weight="800" fill="#b42a22">?</text>
+
+  <!-- Núm của mảnh trước cài vào lỗ của mảnh sau -->
+  <circle cx="288" cy="245" r="18" fill="#5b6573"/>
+  <circle cx="494" cy="245" r="18" fill="#1d7563"/>
+  <circle cx="700" cy="245" r="18" fill="#17202b"/>
+  <circle cx="906" cy="245" r="18" fill="#b42a22"/>
+
+  <g text-anchor="middle" fill="#f4f2ee">
+    <text x="185" y="240" font-size="20" font-weight="700">Máy hơi nước</text>
+    <text x="185" y="270" font-size="16" fill-opacity="0.8">nhà máy, kỹ sư</text>
+    <text x="391" y="240" font-size="20" font-weight="700">Điện, máy tính</text>
+    <text x="391" y="270" font-size="16" fill-opacity="0.8">thế giới số</text>
+    <text x="597" y="240" font-size="20" font-weight="700">Lập trình</text>
+    <text x="597" y="270" font-size="16" fill-opacity="0.8">nghề của thời số</text>
+    <text x="803" y="240" font-size="20" font-weight="700">AI</text>
+    <text x="803" y="270" font-size="16" fill-opacity="0.8">trật tự mới</text>
+  </g>
+
+  <path d="M85 390H1095" stroke="#c4cad1" stroke-width="2"/>
+  <path d="M1109 390l-14 -7v14z" fill="#c4cad1"/>
+  <text x="85" y="424" font-size="16" fill="#5b6573">mỗi cuộc cách mạng xoá cái cũ, mở đường cho cái mới</text>
+</svg>
