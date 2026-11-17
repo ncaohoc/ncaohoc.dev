@@ -14,9 +14,14 @@ const d = entry.data;
 
 const aside = [
   { label: 'Trạng thái', value: d.status },
+  ...(d.version ? [{ label: 'Phiên bản', value: `v${d.version}` }] : []),
   ...(d.stack.length ? [{ label: 'Công nghệ', value: d.stack.join(', ') }] : []),
   ...(d.repo ? [{ label: 'Mã nguồn', value: 'GitHub', href: d.repo }] : []),
   ...(d.link ? [{ label: 'Xem thử', value: new URL(d.link).hostname, href: d.link }] : []),
+];
+const actions = [
+  ...(d.download ? [{ label: d.version ? `Tải về v${d.version}` : 'Tải về', href: d.download, primary: true }] : []),
+  ...(d.repo ? [{ label: 'Mã nguồn trên GitHub', href: d.repo }] : []),
 ];
 ---
 
@@ -27,6 +32,7 @@ const aside = [
   updated={d.updated}
   tags={d.tags}
   aside={aside}
+  actions={actions}
   back={{ href: '/projects/', label: 'Dự án' }}
 >
   <Content />

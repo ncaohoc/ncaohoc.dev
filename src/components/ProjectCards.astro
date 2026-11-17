@@ -7,6 +7,8 @@ interface Item {
   status: string;
   stack: string[];
   repo?: string;
+  download?: string;
+  version?: string;
   featured?: boolean;
 }
 interface Props {
@@ -35,9 +37,18 @@ const { items } = Astro.props;
               {p.stack.map((t) => <li>{t}</li>)}
             </ul>
           )}
-          {p.featured && p.repo && (
+          {p.featured && (p.download || p.repo) && (
             <p class="actions">
-              <a class="btn btn-ghost" href={p.repo}>Mã nguồn trên GitHub</a>
+              {p.download && (
+                <a class="btn" href={p.download}>
+                  {p.version ? `Tải về v${p.version}` : 'Tải về'}
+                </a>
+              )}
+              {p.repo && (
+                <a class="btn btn-ghost" href={p.repo}>
+                  Mã nguồn trên GitHub
+                </a>
+              )}
             </p>
           )}
         </li>
@@ -92,6 +103,9 @@ const { items } = Astro.props;
   .actions {
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
     margin: 0.5rem 0 0;
   }
 </style>

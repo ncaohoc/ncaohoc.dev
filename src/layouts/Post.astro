@@ -13,10 +13,11 @@ interface Props {
   back: { href: string; label: string };
   wide?: boolean; // cheatsheet: bố cục rộng + mục lục bên trái
   aside?: { label: string; value: string; href?: string }[];
+  actions?: { label: string; href: string; primary?: boolean }[]; // nút lớn dưới phần thông tin (tải về, mã nguồn)
   cover?: ImageMetadata;
   headings?: { depth: number; slug: string; text: string }[];
 }
-const { title, description, date, updated, tags = [], back, wide = false, aside = [], cover, headings = [] } = Astro.props;
+const { title, description, date, updated, tags = [], back, wide = false, aside = [], actions = [], cover, headings = [] } = Astro.props;
 const toc = headings.filter((h) => h.depth === 2);
 ---
 
@@ -47,6 +48,17 @@ const toc = headings.filter((h) => h.depth === 2);
               </div>
             ))}
           </dl>
+        )
+      }
+      {
+        actions.length > 0 && (
+          <p class="actions">
+            {actions.map((a) => (
+              <a class:list={['btn', { 'btn-ghost': !a.primary }]} href={a.href}>
+                {a.label}
+              </a>
+            ))}
+          </p>
         )
       }
     </header>
@@ -214,6 +226,12 @@ const toc = headings.filter((h) => h.depth === 2);
   .facts dt {
     font-size: var(--step--1);
     color: var(--muted);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0;
   }
   .facts dd {
     margin: 0.1rem 0 0;

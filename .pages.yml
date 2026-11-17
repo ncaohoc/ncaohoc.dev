@@ -156,6 +156,12 @@ content:
       - name: link
         label: Link sản phẩm
         type: string
+      - name: download
+        label: Link tải về
+        type: string
+      - name: version
+        label: Phiên bản mới nhất
+        type: string
       - name: order
         label: Thứ tự (số nhỏ xếp trước)
         type: number

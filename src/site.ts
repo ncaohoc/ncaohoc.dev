@@ -48,7 +48,16 @@ export function byProjectOrder<T extends { data: { order: number; featured: bool
 // Dữ liệu một dự án cho ProjectCards
 export function projectCard(p: {
   id: string;
-  data: { title: string; description: string; status: string; stack: string[]; repo?: string; featured: boolean };
+  data: {
+    title: string;
+    description: string;
+    status: string;
+    stack: string[];
+    repo?: string;
+    download?: string;
+    version?: string;
+    featured: boolean;
+  };
 }) {
   return {
     href: `/projects/${p.id}/`,
@@ -57,6 +66,8 @@ export function projectCard(p: {
     status: p.data.status,
     stack: p.data.stack,
     repo: p.data.repo,
+    download: p.data.download,
+    version: p.data.version,
     featured: p.data.featured,
   };
 }

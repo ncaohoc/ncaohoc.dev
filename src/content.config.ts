@@ -34,6 +34,8 @@ const projects = defineCollection({
     stack: list(),
     repo: opt(z.string().url()),
     link: opt(z.string().url()),
+    download: opt(z.string().url()), // link tải bản mới nhất (vd. file exe trên GitHub Releases)
+    version: opt(z.coerce.string()), // phiên bản mới nhất, vd. 1.0.0
     order: z.preprocess(empty, z.number().default(100)),
     featured: z.preprocess(empty, z.boolean().default(false)), // card lớn ở trang chủ và trang Dự án
   }),

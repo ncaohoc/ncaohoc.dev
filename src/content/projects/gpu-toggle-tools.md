@@ -6,6 +6,8 @@ updated: 2026-11-17
 status: Đang làm
 stack: [C#, WinForms, .NET Framework 4, Direct3D 11, NVML]
 repo: https://github.com/ncaohoc/GPUToggleTools
+version: 1.0.0
+download: https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe
 tags: [eGPU, Windows, Công cụ]
 order: 0
 featured: true
@@ -14,6 +16,8 @@ featured: true
 Cắm eGPU qua USB4 hay Thunderbolt giúp laptop mạnh hơn hẳn, nhưng đi kèm nhiều phiền toái nhỏ. Game chạy nhầm sang iGPU. Muốn tắt iGPU thì phải mở Device Manager. Rút dây eGPU lúc card còn chạy thì Windows dễ treo. Và lúc FPS tụt, khó biết lỗi do card, do CPU hay do đường truyền USB4.
 
 GPU Toggle Tools gom hết những việc đó vào một cửa sổ nhỏ. App là một file `.exe` duy nhất, không cần cài đặt, chạy trên Windows 10 (2004 trở lên) và Windows 11.
+
+> **Bản mới nhất: v1.0.0.** [Tải GpuToggle.exe](https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe) (khoảng 270 KB), tải xong mở luôn. Ghi chú thay đổi và các bản cũ nằm ở trang [Releases](https://github.com/ncaohoc/GPUToggleTools/releases).
 
 ## App giúp gì cho người dùng eGPU
 
@@ -66,6 +70,15 @@ Với card NVIDIA, trang **PCIe monitor** ghi lưu lượng 4 lần mỗi giây 
 
 Nhấn **Ctrl+Shift+O** trong game để bật bảng thông số ở góc màn hình: FPS và 1 % low, tải và nhiệt độ GPU, VRAM, CPU, RAM, lưu lượng PCIe. Bảng này click xuyên qua được và không bao giờ cướp focus của game.
 
+Từ bản 1.0.0, mỗi thông số có thể kèm một **đồ thị nhỏ** khoảng 10 giây gần nhất, bật/tắt ở dòng **Graph next to**. Mặc định bật cho FPS và PCIe:
+
+- **FPS**: thang tự co giãn theo FPS cao nhất, nên mỗi lần tụt FPS hay khựng hình hiện thành một cái hố, dễ thấy hơn nhìn con số.
+- **CPU**: hai đường, tải tổng và luồng bận nhất. Luồng bận nhất chạm trần trong khi tải tổng thấp là dấu hiệu game bị giới hạn bởi một nhân.
+- **PCIe**: hai chiều lên và xuống chung một thang, thấy ngay lúc nào đường truyền eGPU bị dùng hết.
+
+![Trang OSD: chọn GPU, vị trí, cỡ chữ, các dòng hiện trên OSD và dòng Graph next to để bật đồ thị cho từng thông số](../../assets/uploads/gpu-toggle-osd.png)
+*Trang OSD: chọn thông số nào hiện trên OSD và thông số nào có đồ thị kèm theo. Lúc chụp không có game nào mở nên ô FPS còn trống.*
+
 Dòng **LIM** cho biết thứ đang giới hạn FPS:
 
 | Kết luận | Nghĩa là | Nên làm gì |
@@ -88,11 +101,15 @@ FPS được đọc từ sự kiện mà Windows tự ghi lại (ETW, cùng các
 
 ## Tải và chạy
 
-Hiện chưa có bản dựng sẵn. Bạn tự build trong vài giây, không cần Visual Studio hay .NET SDK:
+1. Tải [GpuToggle.exe bản mới nhất](https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe). Link này luôn trỏ tới bản mới nhất, nên lưu lại để lần sau cập nhật.
+2. Mở file vừa tải. App cần quyền Administrator để bật/tắt thiết bị và sẽ tự xin quyền khi mở.
+3. Số phiên bản hiện ngay trên thanh tiêu đề, cạnh chữ GPU Toggle.
 
-1. Tải mã nguồn từ [GitHub](https://github.com/ncaohoc/GPUToggleTools) (nút **Code → Download ZIP**) và giải nén.
-2. Chạy `build.bat`. Script dùng trình biên dịch C# có sẵn trong Windows và tạo ra `GpuToggle.exe`.
-3. Mở `GpuToggle.exe`. App cần quyền Administrator để bật/tắt thiết bị và sẽ tự xin quyền khi mở.
+> File exe chưa được ký số, nên lần đầu mở Windows SmartScreen có thể hiện cảnh báo. Bấm **More info → Run anyway** để chạy.
+
+Mỗi bản phát hành trên trang [Releases](https://github.com/ncaohoc/GPUToggleTools/releases) có kèm mã SHA-256 của file exe, dùng để kiểm tra file tải về có đúng không.
+
+Muốn tự build từ mã nguồn thì cũng không cần Visual Studio hay .NET SDK: tải mã nguồn, chạy `build.bat`, script dùng trình biên dịch C# có sẵn trong Windows để tạo ra `GpuToggle.exe`.
 
 Yêu cầu: Windows 10 bản 2004 trở lên hoặc Windows 11, .NET Framework 4.x (có sẵn trong Windows). Các thông số riêng của NVIDIA cần driver NVIDIA.
 
