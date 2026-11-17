@@ -21,9 +21,10 @@
 
   --step--1: 0.875rem;
   --step-0: 1.0625rem;
-  --step-1: 1.3rem;
-  --step-2: 1.7rem;
-  --step-3: 2.3rem;
+  /* Cỡ chữ tiêu đề co lại trên màn hình hẹp, giữ nguyên trên desktop */
+  --step-1: clamp(1.15rem, 1rem + 0.75vw, 1.3rem);
+  --step-2: clamp(1.4rem, 1.1rem + 1.5vw, 1.7rem);
+  --step-3: clamp(1.85rem, 1.3rem + 2.6vw, 2.3rem);
   --step-4: clamp(2.6rem, 7vw, 5.25rem);
 
   --wrap: 68rem;
@@ -60,11 +61,12 @@
 }
 html {
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
   scroll-padding-top: calc(var(--header-h) + 1rem);
 }
 @media (max-width: 640px) {
   :root {
-    --header-h: 6.25rem;
+    --header-h: 6.5rem;
   }
 }
 
@@ -208,6 +210,16 @@ h4 {
   white-space: nowrap;
   padding-top: 0.25rem;
 }
+/* Điện thoại: ngày xuống dưới tiêu đề để tiêu đề có đủ chiều ngang */
+@media (max-width: 520px) {
+  .entry {
+    grid-template-columns: 1fr;
+  }
+  .entry time,
+  .entry .meta {
+    padding-top: 0;
+  }
+}
 
 .tags {
   display: flex;
@@ -265,7 +277,12 @@ h4 {
 .btn:hover {
   background: var(--seal);
   border-color: var(--seal);
-  transform: translateY(-1px);
+}
+/* Hiệu ứng nhấc lên chỉ dùng cho chuột; trên màn hình cảm ứng :hover bị dính sau khi chạm */
+@media (hover: hover) {
+  .btn:hover {
+    transform: translateY(-1px);
+  }
 }
 .btn-ghost {
   background: transparent;
@@ -301,11 +318,16 @@ h4 {
     box-shadow 0.25s var(--ease),
     border-color 0.25s;
 }
-.card:hover,
 .card:focus-within {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-2);
   border-color: color-mix(in srgb, var(--jade) 45%, var(--rule));
+}
+@media (hover: hover) {
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-2);
+    border-color: color-mix(in srgb, var(--jade) 45%, var(--rule));
+  }
 }
 /* Cả card bấm được nhờ lớp ::after của link tiêu đề */
 .card-link {
@@ -340,7 +362,7 @@ h4 {
 
 /* ---------- Page header ---------- */
 .page-head {
-  padding-block: 3.5rem 2rem;
+  padding-block: clamp(2rem, 7vw, 3.5rem) 2rem;
 }
 .page-head h1 {
   font-size: var(--step-3);
@@ -355,6 +377,11 @@ h4 {
 /* ---------- Prose (markdown) ---------- */
 .prose {
   max-width: var(--measure);
+  overflow-wrap: break-word;
+}
+/* Tên API, URL dài trong đoạn văn được ngắt dòng để không đẩy trang tràn ngang trên điện thoại */
+.prose :not(pre) > code {
+  overflow-wrap: anywhere;
 }
 .prose > * + * {
   margin-top: 1.1em;

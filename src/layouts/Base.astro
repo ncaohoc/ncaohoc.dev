@@ -111,11 +111,26 @@ const nav = NAV.filter((item) => item.href !== '/hobbies/' || hobbyCount > 0);
         root.dataset.theme = next;
         try { localStorage.setItem('theme', next); } catch (e) {}
       });
-      // Header hiện viền và bóng khi trang đã cuộn xuống
+      // Header hiện viền và bóng khi trang đã cuộn xuống.
+      // Trên điện thoại header cao 2 hàng nên tự ẩn khi cuộn xuống, hiện lại khi cuộn lên.
       (() => {
         const h = document.querySelector('.site-header');
         if (!h) return;
-        const on = () => h.toggleAttribute('data-scrolled', window.scrollY > 8);
+        const narrow = matchMedia('(max-width: 640px)');
+        let lastY = window.scrollY;
+        const on = () => {
+          const y = window.scrollY;
+          h.toggleAttribute('data-scrolled', y > 8);
+          const dy = y - lastY;
+          if (Math.abs(dy) < 6) return;
+          // không ẩn khi đang dùng bàn phím trong header
+          const hide = narrow.matches && dy > 0 && y > h.offsetHeight && !h.querySelector(':focus-visible');
+          h.toggleAttribute('data-hidden', hide);
+          lastY = y;
+        };
+        h.addEventListener('focusin', () => {
+          if (h.querySelector(':focus-visible')) h.removeAttribute('data-hidden');
+        });
         window.addEventListener('scroll', on, { passive: true });
         on();
       })();
@@ -146,7 +161,12 @@ const nav = NAV.filter((item) => item.href !== '/hobbies/' || hobbyCount > 0);
     border-bottom: 1px solid transparent;
     transition:
       border-color 0.25s,
-      box-shadow 0.25s;
+      box-shadow 0.25s,
+      transform 0.3s var(--ease);
+  }
+  .site-header[data-hidden] {
+    transform: translateY(-100%);
+    box-shadow: none;
   }
   .site-header[data-scrolled] {
     border-bottom-color: var(--rule);
@@ -260,7 +280,8 @@ const nav = NAV.filter((item) => item.href !== '/hobbies/' || hobbyCount > 0);
   @media (max-width: 640px) {
     .header-inner {
       flex-wrap: wrap;
-      padding-bottom: 0.5rem;
+      row-gap: 0.25rem;
+      padding-block: 0.5rem 0.4rem;
     }
     nav {
       order: 3;
@@ -272,9 +293,24 @@ const nav = NAV.filter((item) => item.href !== '/hobbies/' || hobbyCount > 0);
       overflow-x: auto;
       scrollbar-width: none;
     }
+    /* Vùng chạm cao 40px cho dễ bấm bằng ngón tay */
     nav a {
-      padding: 0.35rem 0.5rem;
+      display: flex;
+      align-items: center;
+      min-height: 2.5rem;
+      padding: 0 0.6rem;
       white-space: nowrap;
+    }
+    .theme-toggle {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+    .site-footer {
+      margin-top: 3.5rem;
+    }
+    .site-footer a {
+      display: inline-block;
+      padding-block: 0.4rem;
     }
   }
 </style>

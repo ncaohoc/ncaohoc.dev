@@ -160,8 +160,8 @@ const toc = headings.filter((h) => h.depth === 2);
 
 <style>
   .post-head {
-    padding-block: 3rem 2.5rem;
-    margin-bottom: 2.5rem;
+    padding-block: clamp(1.75rem, 6vw, 3rem) clamp(1.75rem, 5vw, 2.5rem);
+    margin-bottom: clamp(1.75rem, 5vw, 2.5rem);
     border-bottom: 1px solid var(--rule);
   }
   .back {
@@ -210,7 +210,8 @@ const toc = headings.filter((h) => h.depth === 2);
   }
   .facts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    /* 9rem để điện thoại vẫn xếp được 2 cột */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
     gap: 1px;
     margin: 1.75rem 0 0;
     max-width: 48rem;
@@ -332,7 +333,8 @@ const toc = headings.filter((h) => h.depth === 2);
   }
   @media (max-width: 900px) {
     .sheet-layout {
-      grid-template-columns: 1fr;
+      /* minmax(0, …) để bảng, khối code dài tự cuộn ngang thay vì kéo giãn cả trang */
+      grid-template-columns: minmax(0, 1fr);
       gap: 1.5rem;
     }
     .toc {
