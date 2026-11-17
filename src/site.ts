@@ -39,3 +39,24 @@ export function slugify(s: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
+
+// Thứ tự dự án: nổi bật lên đầu, sau đó theo `order`
+export function byProjectOrder<T extends { data: { order: number; featured: boolean } }>(a: T, b: T) {
+  return Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order;
+}
+
+// Dữ liệu một dự án cho ProjectCards
+export function projectCard(p: {
+  id: string;
+  data: { title: string; description: string; status: string; stack: string[]; repo?: string; featured: boolean };
+}) {
+  return {
+    href: `/projects/${p.id}/`,
+    title: p.data.title,
+    description: p.data.description,
+    status: p.data.status,
+    stack: p.data.stack,
+    repo: p.data.repo,
+    featured: p.data.featured,
+  };
+}

@@ -159,6 +159,10 @@ content:
       - name: order
         label: Thứ tự (số nhỏ xếp trước)
         type: number
+      - name: featured
+        label: Nổi bật (card lớn ở trang chủ)
+        type: boolean
+        default: false
       - name: tags
         label: Thẻ
         type: string

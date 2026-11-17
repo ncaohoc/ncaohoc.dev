@@ -35,6 +35,7 @@ const projects = defineCollection({
     repo: opt(z.string().url()),
     link: opt(z.string().url()),
     order: z.preprocess(empty, z.number().default(100)),
+    featured: z.preprocess(empty, z.boolean().default(false)), // card lớn ở trang chủ và trang Dự án
   }),
 });
 

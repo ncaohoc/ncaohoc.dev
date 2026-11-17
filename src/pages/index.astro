@@ -3,13 +3,14 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Seal from '../components/Seal.astro';
 import EntryList from '../components/EntryList.astro';
-import { SITE, published } from '../site';
+import ProjectCards from '../components/ProjectCards.astro';
+import { SITE, published, byProjectOrder, projectCard } from '../site';
 import AlbumGrid from '../components/AlbumGrid.astro';
 
 const posts = published(await getCollection('blog')).slice(0, 5);
 const sheets = published(await getCollection('cheatsheets')).slice(0, 6);
 const projects = published(await getCollection('projects'))
-  .sort((a, b) => a.data.order - b.data.order)
+  .sort(byProjectOrder)
   .slice(0, 4);
 const hobbies = published(await getCollection('hobbies')).slice(0, 3);
 const albums = published(await getCollection('albums')).slice(0, 3);
@@ -18,6 +19,7 @@ const albums = published(await getCollection('albums')).slice(0, 3);
 <Base>
   <section class="hero wrap">
     <div class="hero-text">
+      <p class="pill hello"><span class="dot" aria-hidden="true"></span>Unity game developer · Sài Gòn</p>
       <h1>{SITE.fullName}</h1>
       <p class="lede">
         Mình là Unity game developer ở Sài Gòn. Từng làm gameplay cho game fitness nhiều máy tại Aviron, giờ đang
@@ -28,7 +30,7 @@ const albums = published(await getCollection('albums')).slice(0, 3);
       </p>
       <p class="hero-links">
         <a href="/cv/" class="btn">Xem CV</a>
-        <a href="/blog/">Đọc blog</a>
+        <a href="/projects/" class="btn btn-ghost">Xem dự án</a>
       </p>
     </div>
     <div class="hero-seal" aria-hidden="true">
@@ -51,15 +53,7 @@ const albums = published(await getCollection('albums')).slice(0, 3);
 
     <section class="section">
       <h2><a href="/projects/">Dự án</a><small>Đang làm và đã xong</small></h2>
-      <EntryList
-        items={projects.map((p) => ({
-          href: `/projects/${p.id}/`,
-          title: p.data.title,
-          description: p.data.description,
-          status: p.data.status,
-          tags: p.data.stack,
-        }))}
-      />
+      <ProjectCards items={projects.map(projectCard)} />
     </section>
 
     {
@@ -99,6 +93,8 @@ const albums = published(await getCollection('albums')).slice(0, 3);
 
 <style>
   .hero {
+    position: relative;
+    isolation: isolate;
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
@@ -126,20 +122,42 @@ const albums = published(await getCollection('albums')).slice(0, 3);
   .hero-links {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin: 2rem 0 0;
-    font-weight: 600;
   }
-  .btn {
-    display: inline-block;
-    padding: 0.65rem 1.3rem;
-    background: var(--ink);
-    color: var(--paper);
-    text-decoration: none;
-    border-radius: 6px;
+  /* Nền hero: lưới chấm mờ dần và vầng sáng đỏ sau con dấu */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(50% - 50vw);
+    z-index: -1;
+    background:
+      radial-gradient(32rem 22rem at 82% 45%, var(--seal-soft), transparent 70%),
+      radial-gradient(circle, var(--rule) 1px, transparent 1.5px) 0 0 / 22px 22px;
+    -webkit-mask-image: linear-gradient(to bottom, var(--ink) 40%, transparent);
+    mask-image: linear-gradient(to bottom, var(--ink) 40%, transparent);
+    pointer-events: none;
   }
-  .btn:hover {
-    background: var(--seal);
+  .hello {
+    margin: 0 0 1.25rem;
+  }
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 0 currentColor;
+    animation: ping 2.4s var(--ease) infinite;
+  }
+  @keyframes ping {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--jade) 55%, transparent);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 0.6rem transparent;
+    }
   }
   .hobby-col {
     display: grid;
