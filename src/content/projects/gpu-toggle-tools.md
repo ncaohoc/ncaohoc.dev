@@ -1,12 +1,12 @@
 ---
 title: GPU Toggle Tools
-description: Công cụ miễn phí cho người dùng eGPU trên Windows. Bật/tắt GPU một cú bấm, chọn card cho từng game, đo băng thông PCIe và xem OSD ngay trong game để biết cái gì đang giới hạn FPS.
+description: Công cụ miễn phí cho người dùng eGPU trên Windows. Bật/tắt GPU một cú bấm, chọn card cho từng game, đo băng thông PCIe, xem OSD ngay trong game để biết cái gì đang giới hạn FPS, và sửa lỗi Code 43.
 date: 2026-11-16
 updated: 2026-11-17
 status: Đang làm
 stack: [C#, WinForms, .NET Framework 4, Direct3D 11, NVML]
 repo: https://github.com/ncaohoc/GPUToggleTools
-version: 1.0.0
+version: 1.0.1
 download: https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe
 tags: [eGPU, Windows, Công cụ]
 order: 0
@@ -17,7 +17,7 @@ Cắm eGPU qua USB4 hay Thunderbolt giúp laptop mạnh hơn hẳn, nhưng đi k
 
 GPU Toggle Tools gom hết những việc đó vào một cửa sổ nhỏ. App là một file `.exe` duy nhất, không cần cài đặt, chạy trên Windows 10 (2004 trở lên) và Windows 11.
 
-> **Bản mới nhất: v1.0.0.** [Tải GpuToggle.exe](https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe) (khoảng 270 KB), tải xong mở luôn. Ghi chú thay đổi và các bản cũ nằm ở trang [Releases](https://github.com/ncaohoc/GPUToggleTools/releases).
+> **Bản mới nhất: v1.0.1**, thêm trang **Repair** để gỡ sạch driver và sửa lỗi Code 43. [Tải GpuToggle.exe](https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe) (khoảng 310 KB), tải xong mở luôn. Ghi chú thay đổi và các bản cũ nằm ở trang [Releases](https://github.com/ncaohoc/GPUToggleTools/releases).
 
 ## App giúp gì cho người dùng eGPU
 
@@ -28,6 +28,7 @@ GPU Toggle Tools gom hết những việc đó vào một cửa sổ nhỏ. App 
 | Tắt nhầm card, màn hình đen | Sau 15 giây không bấm **Keep**, GPU tự bật lại |
 | Không biết đường truyền eGPU có bị nghẽn | Đo băng thông PCIe thật và vẽ đồ thị lưu lượng khi chơi game |
 | FPS thấp mà không rõ lý do | OSD trong game cho biết FPS đang bị giới hạn bởi GPU, CPU, PCIe hay VRAM |
+| eGPU báo lỗi Code 43, driver cài hỏng | Trang **Repair** gỡ sạch driver NVIDIA / AMD và thử sửa Code 43 từ nhẹ đến mạnh |
 
 ## Bật/tắt GPU
 
@@ -92,12 +93,44 @@ FPS được đọc từ sự kiện mà Windows tự ghi lại (ETW, cùng các
 
 > OSD là cửa sổ luôn nằm trên cùng. Game chạy *exclusive fullscreen* có thể che mất nó, khi đó hãy chuyển game sang *borderless*.
 
+## Sửa lỗi driver và Code 43
+
+Bản 1.0.1 thêm trang **Repair**. Các công cụ ở đây can thiệp sâu vào hệ thống nên được tách riêng một trang. Mọi bước đều ghi vào ô **Log** ở cuối trang.
+
+### Gỡ sạch driver NVIDIA / AMD
+
+Làm việc giống DDU. Chọn hãng (app tự chọn theo card đang có) rồi bấm **Remove driver...**. App quét trước, ghi ra Log mọi thứ sẽ xoá, hỏi lại rồi mới làm:
+
+1. Tạo restore point.
+2. Tắt các chương trình và service của hãng, như NVIDIA App hay AMD External Events.
+3. Xoá mọi gói driver của hãng khỏi driver store: driver màn hình, âm thanh HDMI, USB-C...
+4. Xoá service, gỡ thiết bị, dọn thư mục còn sót và shader cache.
+5. Quét lại phần cứng. Card quay về *Microsoft Basic Display Adapter*, khởi động lại rồi cài driver mới.
+
+Với AMD, app chỉ xoá phần của card Radeon, **không đụng tới driver chipset**. Có thêm ô chặn Windows Update tự cài lại driver cũ ngay sau khi gỡ.
+
+Muốn gỡ sạch nhất thì bấm **Restart to Safe Mode...**. Máy vào Safe Mode đúng **một lần**, lần khởi động sau tự về chế độ thường nên không bị kẹt.
+
+> Safe Mode không có mạng và thường không nhận PIN hay Windows Hello, bạn phải nhập **mật khẩu tài khoản** (với tài khoản Microsoft là mật khẩu Microsoft). Không chắc nhớ mật khẩu thì đừng vào Safe Mode, cứ bấm **Remove driver...** ở chế độ thường, vẫn gỡ được, chỉ kém sạch hơn một chút.
+
+### Fix code 43
+
+Ô trạng thái cho biết card nào đang bị Windows dừng với lỗi **Code 43**. Bấm **Fix code 43**, app thử từ nhẹ đến mạnh và dừng ngay khi card chạy lại:
+
+1. Khởi động lại thiết bị.
+2. Gỡ thiết bị rồi quét lại để Windows cài lại từ đầu.
+3. Xoá các adapter "ma", tức eGPU từng cắm ở cổng khác, rồi quét lại.
+4. Riêng card NVIDIA trong hộp eGPU: ghi giá trị `RM1774520` vào khoá driver của card, cách sửa lỗi 43 quen thuộc trong cộng đồng eGPU. Đồng thời tắt Fast Startup và chế độ tiết kiệm điện của link PCIe.
+
+Bước 4 chỉ chạy khi ô **I use an eGPU** được tick. App tự tick khi card lỗi nằm sau chip USB4 / Thunderbolt. Hộp eGPU cắm qua OCuLink hay M.2 thì bạn tự tick. Card gắn trong máy thì đừng tick. Giá trị này mất khi cập nhật driver, lúc đó bấm **Fix code 43** lại.
+
 ## Mẹo khi dùng eGPU
+
+- **Rút eGPU trước khi tắt máy, cắm lại sau khi vào Windows.** Trước khi Shut down hay Restart, **Disable** eGPU trong app rồi rút dây. Mở máy, đăng nhập vào desktop xong mới cắm lại và **Enable**. eGPU có mặt lúc khởi động là nguyên nhân hay gặp của Code 43, màn hình đen và adapter "ma". Windows cũng hay coi đó là phần cứng thay đổi và bắt đặt lại PIN. Đây chính là việc app được làm ra để làm nhanh, thay cho Device Manager.
 
 - **Cắm màn hình thẳng vào eGPU.** Nếu màn hình cắm vào laptop, hình phải chạy ngược từ eGPU về qua dây USB4, tốn thêm băng thông vốn đã hẹp.
 - **Trước khi tắt iGPU**, bấm `Win + P` và chọn *Second screen only*. Kiểm tra ở *Settings → System → Display → Advanced display* rằng màn hình ngoài đang *Connected to* card eGPU.
 - **Màn hình đen?** Thử `Win + Ctrl + Shift + B`, rút ra cắm lại dây màn hình, hoặc chờ 15 giây để app tự bật lại GPU.
-- **Tắt eGPU trong app trước khi rút dây.**
 
 ## Tải và chạy
 
