@@ -404,6 +404,25 @@ h4 {
 .prose img {
   border-radius: var(--radius-sm);
 }
+/* Ảnh đứng riêng một đoạn: rộng hơn cột chữ, dòng in nghiêng ngay sau ảnh là chú thích */
+.prose p:has(> img) {
+  width: min(56rem, calc(100vw - 2 * var(--gutter)));
+  margin-block: 2em;
+}
+.prose p:has(> img) img {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+}
+.prose p:has(> img) > em {
+  display: block;
+  margin-top: 0.85rem;
+  font-size: var(--step--1);
+  font-style: normal;
+  color: var(--muted);
+}
 .prose table {
   width: 100%;
   border-collapse: collapse;

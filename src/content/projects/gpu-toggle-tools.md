@@ -32,6 +32,9 @@ GPU Toggle Tools gom hết những việc đó vào một cửa sổ nhỏ. App 
 - Có bảng màn hình: màn hình nào đang được card nào xuất hình, độ phân giải và tần số quét.
 - Card NVIDIA hiện thêm nhiệt độ, công suất và tốc độ quạt.
 
+![Trang GPUs của GPU Toggle Tools: bảng card đồ họa gồm iGPU AMD Radeon Graphics và eGPU NVIDIA GeForce RTX 5060 Ti, bên dưới là bảng màn hình](../../assets/uploads/gpu-toggle-gpus.png)
+*Trang GPUs: iGPU AMD và eGPU RTX 5060 Ti đều đang bật. Màn hình 1440p 144 Hz đang được eGPU xuất hình.*
+
 Hai chốt an toàn giúp bạn không bị kẹt:
 
 1. Tắt GPU cuối cùng còn chạy thì app hỏi lại, nút mặc định là **No**.
@@ -43,15 +46,21 @@ Trang **Apps / Games** cho biết Windows đang coi card nào là *Power saving*
 
 Cài đặt được ghi vào đúng chỗ của *Settings → System → Display → Graphics*, nên Windows cũng thấy. Cột **Running on** cập nhật mỗi 2 giây, cho biết game đang chạy trên card nào và tải bao nhiêu phần trăm.
 
+![Trang Apps / Games: danh sách ứng dụng, mỗi dòng có nhãn GPU đã chọn như Power saving hay High performance](../../assets/uploads/gpu-toggle-apps.png)
+*Trang Apps / Games: ELDEN RING được đặt chạy trên eGPU, ứng dụng nhẹ để iGPU lo.*
+
 > Game mở qua Steam hay Epic thì hãy thêm file `.exe` của chính game, không phải của launcher.
 
 ## Đo băng thông PCIe
 
 Với eGPU, đường truyền thường là thứ giới hạn đầu tiên. App chép khối dữ liệu 64 MB giữa RAM và VRAM theo cả hai chiều, bấm giờ bằng timestamp của GPU, nên chạy được với card NVIDIA, AMD lẫn Intel.
 
-Kết quả hiện link PCIe đang chạy (ví dụ `Gen4 x4`), băng thông lý thuyết và tốc độ đo thực tế. App tự nhận ra eGPU cắm qua USB4 / Thunderbolt. Ví dụ một eGPU Gen4 x4 qua USB4 đo được khoảng 3,8 GB/s trên 7,9 GB/s lý thuyết.
+Kết quả hiện link PCIe đang chạy (ví dụ `Gen4 x4`), băng thông lý thuyết và tốc độ đo thực tế. App tự nhận ra eGPU cắm qua USB4 / Thunderbolt. Trên máy mình, eGPU RTX 5060 Ti chạy link Gen4 x4 đo được khoảng 3,3 GB/s mỗi chiều, chỉ bằng 42 % con số lý thuyết 7,88 GB/s.
 
 Với card NVIDIA, trang **PCIe monitor** ghi lưu lượng 4 lần mỗi giây khi bạn chơi game. Đồ thị tô đỏ những lúc bị nghẽn, kèm nhật ký từng lần nghẽn và nút xuất file CSV.
+
+![Trang PCIe monitor: các thẻ Link limit, Now, Average, Peak, Bottleneck time và đồ thị lưu lượng PCIe trong 2 phút](../../assets/uploads/gpu-toggle-pcie.png)
+*PCIe monitor sau 2 phút ghi. Giới hạn đo thực tế là 3,32 GB/s (42 % link), nên app tự đặt ngưỡng nghẽn ở 41 %. Lúc chụp máy chỉ chạy desktop nên lưu lượng còn thấp.*
 
 ## OSD trong game
 
