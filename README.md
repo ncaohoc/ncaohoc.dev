@@ -19,7 +19,7 @@ Tạo file Markdown trong đúng thư mục, tên file chính là đường dẫ
 | Loại | Thư mục | Đường dẫn |
 | --- | --- | --- |
 | Blog | `src/content/blog/` | `/blog/<tên-file>/` |
-| Cheatsheet | `src/content/cheatsheets/` | `/cheatsheets/<tên-file>/` |
+| Kiến thức | `src/content/cheatsheets/` | `/kien-thuc/<tên-file>/` |
 | Dự án | `src/content/projects/` | `/projects/<tên-file>/` |
 | Sở thích | `src/content/hobbies/` | `/hobbies/<tên-file>/` |
 

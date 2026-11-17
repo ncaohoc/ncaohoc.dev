@@ -12,6 +12,6 @@ const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 ---
 
-<Post {...entry.data} headings={headings} back={{ href: '/cheatsheets/', label: 'Cheatsheet' }} wide>
+<Post {...entry.data} headings={headings} back={{ href: '/kien-thuc/', label: 'Kiến thức' }} wide>
   <Content />
 </Post>

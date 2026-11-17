@@ -1,0 +1,3 @@
+# Đường dẫn cũ của mục Kiến thức (trước đây là Cheatsheet)
+/cheatsheets /kien-thuc/ 301
+/cheatsheets/* /kien-thuc/:splat 301

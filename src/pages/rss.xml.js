@@ -10,10 +10,10 @@ export async function GET(context) {
     link: `/blog/${p.id}/`,
   }));
   const sheets = published(await getCollection('cheatsheets')).map((s) => ({
-    title: `Cheatsheet: ${s.data.title}`,
+    title: `Kiến thức: ${s.data.title}`,
     description: s.data.description,
     pubDate: s.data.date,
-    link: `/cheatsheets/${s.id}/`,
+    link: `/kien-thuc/${s.id}/`,
   }));
 
   return rss({

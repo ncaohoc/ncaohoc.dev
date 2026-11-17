@@ -26,7 +26,7 @@ const albums = published(await getCollection('albums')).slice(0, 3);
         tự phát triển game riêng và học shader từ gốc.
       </p>
       <p class="lede">
-        Ở đây mình ghi lại những gì học được, những cheatsheet hay mở lại, và tiến độ các dự án riêng.
+        Ở đây mình ghi lại những gì học được, những kiến thức hay mở lại, và tiến độ các dự án riêng.
       </p>
       <p class="hero-links">
         <a href="/cv/" class="btn">Xem CV</a>
@@ -78,10 +78,10 @@ const albums = published(await getCollection('albums')).slice(0, 3);
     }
 
     <section class="section">
-      <h2><a href="/cheatsheets/">Cheatsheet</a><small>Tra nhanh khi cần</small></h2>
+      <h2><a href="/kien-thuc/">Kiến thức</a><small>Tra nhanh khi cần</small></h2>
       <EntryList
         items={sheets.map((s) => ({
-          href: `/cheatsheets/${s.id}/`,
+          href: `/kien-thuc/${s.id}/`,
           title: s.data.title,
           description: s.data.description,
           tags: s.data.tags,

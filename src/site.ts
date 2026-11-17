@@ -12,7 +12,7 @@ export const SITE = {
 
 export const NAV = [
   { href: '/blog/', label: 'Blog' },
-  { href: '/cheatsheets/', label: 'Cheatsheet' },
+  { href: '/kien-thuc/', label: 'Kiến thức' },
   { href: '/projects/', label: 'Dự án' },
   { href: '/hobbies/', label: 'Sở thích' },
   { href: '/cv/', label: 'CV' },

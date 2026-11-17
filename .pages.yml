@@ -61,7 +61,7 @@ content:
           format: markdown
 
   - name: cheatsheets
-    label: Cheatsheet
+    label: Kiến thức
     type: collection
     path: src/content/cheatsheets
     exclude: [.gitkeep]
