@@ -15,13 +15,14 @@ interface Props {
   aside?: { label: string; value: string; href?: string }[];
   actions?: { label: string; href: string; primary?: boolean }[]; // nút lớn dưới phần thông tin (tải về, mã nguồn)
   cover?: ImageMetadata;
+  ogImage?: ImageMetadata; // ảnh khi chia sẻ link; bỏ trống thì dùng ảnh bìa
   headings?: { depth: number; slug: string; text: string }[];
 }
-const { title, description, date, updated, tags = [], back, wide = false, aside = [], actions = [], cover, headings = [] } = Astro.props;
+const { title, description, date, updated, tags = [], back, wide = false, aside = [], actions = [], cover, ogImage, headings = [] } = Astro.props;
 const toc = headings.filter((h) => h.depth === 2);
 ---
 
-<Base title={title} description={description} type="article">
+<Base title={title} description={description} type="article" image={ogImage ?? cover}>
   <article class="wrap">
     <header class="post-head">
       <a class="back" href={back.href}>{back.label}</a>

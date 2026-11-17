@@ -3,6 +3,7 @@ title: Chia sẻ tri thức và số phận nghề lập trình
 description: Tinh thần chia sẻ đã đưa nghề lập trình lên đỉnh, và cũng chính nó đang đẩy nghề này vào một khúc quanh lớn khi AI học từ kho tri thức chung.
 date: 2026-11-17
 tags: [AI, nghề lập trình, suy nghĩ]
+ogImage: ../../assets/uploads/og-chia-se-tri-thuc.png
 ---
 
 Nếu bạn có một điều rất quý, một kinh nghiệm, một bí quyết, một lời giải, bạn sẽ giữ nó cho riêng mình hay đem chia sẻ cho cả thế giới?

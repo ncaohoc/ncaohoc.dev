@@ -46,6 +46,9 @@ content:
         default: ""
         options:
           format: yyyy-MM-dd
+      - name: ogImage
+        label: Ảnh chia sẻ (LinkedIn, Facebook), nên 1200×627
+        type: image
       - name: tags
         label: Thẻ
         type: string

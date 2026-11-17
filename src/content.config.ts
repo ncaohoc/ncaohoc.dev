@@ -18,7 +18,11 @@ const base = {
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
-  schema: z.object(base),
+  schema: ({ image }) =>
+    z.object({
+      ...base,
+      ogImage: opt(image()), // ảnh hiện khi chia sẻ link (LinkedIn, Facebook...), nên 1200×627
+    }),
 });
 
 const cheatsheets = defineCollection({

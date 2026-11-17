@@ -2,14 +2,20 @@
 import '../styles/global.css';
 import Seal from '../components/Seal.astro';
 import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { SITE, NAV, published } from '../site';
 
 interface Props {
   title?: string;
   description?: string;
   type?: 'website' | 'article';
+  image?: ImageMetadata; // ảnh og:image khi chia sẻ link
 }
-const { title, description = SITE.description, type = 'website' } = Astro.props;
+const { title, description = SITE.description, type = 'website', image } = Astro.props;
+// LinkedIn không nhận WebP, nên xuất ảnh chia sẻ ra JPG rộng tối đa 1200px
+const og = image && (await getImage({ src: image, format: 'jpg', quality: 88, width: Math.min(image.width, 1200) }));
+const ogUrl = og && new URL(og.src, Astro.site);
 const pageTitle = title ? `${title} · ${SITE.name}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const path = Astro.url.pathname;
@@ -38,6 +44,18 @@ const nav = NAV.filter((item) => item.href !== '/hobbies/' || hobbyCount > 0);
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content="vi_VN" />
+    {
+      og && ogUrl && (
+        <>
+          <meta property="og:image" content={ogUrl} />
+          <meta property="og:image:width" content={String(og.attributes.width ?? '')} />
+          <meta property="og:image:height" content={String(og.attributes.height ?? '')} />
+          <meta property="og:image:alt" content={title} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:image" content={ogUrl} />
+        </>
+      )
+    }
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
