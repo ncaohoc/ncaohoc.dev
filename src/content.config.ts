@@ -74,6 +74,7 @@ const hobbies = defineCollection({
       category: z.string(), // ví dụ: 'Nhiếp ảnh', 'Mô hình'
       gear: list(), // máy ảnh, ống kính, kit mô hình...
       cover: opt(image()), // đường dẫn tương đối tới ảnh, ví dụ ../../assets/uploads/anh-bia.jpg
+      ogImage: opt(image()), // ảnh khi chia sẻ link, nên 1200×627; bỏ trống thì dùng ảnh bìa
     }),
 });
 

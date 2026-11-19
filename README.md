@@ -76,6 +76,7 @@ Bài về sở thích nằm trong `src/content/hobbies/`, frontmatter có thêm:
 category: Nhiếp ảnh      # hoặc Mô hình... mỗi chủ đề tự thành một mục
 gear: [OM-3, 12-45mm]    # máy, ống kính, kit...
 cover: ../../assets/uploads/anh-bia.jpg   # tuỳ chọn
+ogImage: ../../assets/uploads/og-bai.png  # tuỳ chọn, ảnh khi chia sẻ link (1200×627), bỏ trống thì dùng ảnh bìa
 ```
 
 Ảnh dùng trong bài và ảnh bìa để trong `src/assets/uploads/`, ghi đường dẫn tương đối từ file bài: `../../assets/uploads/<tên-file>`.

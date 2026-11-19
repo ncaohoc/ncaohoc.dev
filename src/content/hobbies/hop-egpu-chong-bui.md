@@ -6,6 +6,7 @@ category: Tự làm
 gear: [ASUS Dual, Dock Aoostar (OCuLink + USB4), ROG Ally, Hộp mica trưng bày, Quạt 12cm, Mạch PWM có cảm biến nhiệt, Nguồn 12V 3.3A, Cút nối Wago]
 tags: [eGPU, DIY, Phần cứng]
 cover: ../../assets/uploads/egpu-box-mat-truoc.jpg
+ogImage: ../../assets/uploads/og-hop-egpu.png
 ---
 
 Máy chơi game của mình là một chiếc ROG Ally cắm eGPU. Dock Aoostar nối với máy qua OCuLink hoặc USB4, card ASUS Dual màu trắng gắn ngay trên dock. Bộ này mạnh, nhưng để trần trên kệ thì vài tuần là card bám một lớp bụi.

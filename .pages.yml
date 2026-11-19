@@ -285,6 +285,9 @@ content:
       - name: cover
         label: Ảnh bìa
         type: image
+      - name: ogImage
+        label: Ảnh chia sẻ (Facebook, LinkedIn), nên 1200×627. Bỏ trống thì dùng ảnh bìa
+        type: image
       - name: tags
         label: Thẻ
         type: string
