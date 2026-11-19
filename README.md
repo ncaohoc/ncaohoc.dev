@@ -119,3 +119,7 @@ Màu và cỡ chữ nằm ở đầu `src/styles/global.css`. Tên, mô tả sit
 4. Sau khi deploy xong, vào **Custom domains** của project, thêm `ncaohoc.dev` (và `www.ncaohoc.dev` nếu muốn). Domain mua ở Cloudflare nên DNS và HTTPS được cấu hình tự động.
 
 Từ đó, mỗi lần push lên nhánh chính là site tự build lại.
+
+## Giấy phép
+
+Mã nguồn theo giấy phép MIT, xem [LICENSE](LICENSE).
