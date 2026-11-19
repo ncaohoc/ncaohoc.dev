@@ -60,12 +60,12 @@ Cài đặt được ghi vào đúng chỗ của *Settings → System → Displa
 
 Với eGPU, đường truyền thường là thứ giới hạn đầu tiên. App chép khối dữ liệu 64 MB giữa RAM và VRAM theo cả hai chiều, bấm giờ bằng timestamp của GPU, nên chạy được với card NVIDIA, AMD lẫn Intel.
 
-Kết quả hiện link PCIe đang chạy (ví dụ `Gen4 x4`), băng thông lý thuyết và tốc độ đo thực tế. App tự nhận ra eGPU cắm qua USB4 / Thunderbolt. Trên máy mình, eGPU RTX 5060 Ti chạy link Gen4 x4 đo được khoảng 3,3 GB/s mỗi chiều, chỉ bằng 42 % con số lý thuyết 7,88 GB/s.
+Kết quả hiện link PCIe đang chạy (ví dụ `Gen4 x4`), băng thông lý thuyết và tốc độ đo thực tế. App tự nhận ra eGPU cắm qua USB4 / Thunderbolt. Trên máy mình, eGPU RTX 5060 Ti chạy link Gen4 x4 đo được khoảng 3,8 GB/s mỗi chiều, chưa tới một nửa con số lý thuyết 7,88 GB/s. Nên đo lúc máy rảnh: đo khi game đang chạy, con số sẽ thấp hơn thật vì game chiếm sẵn một phần đường truyền.
 
 Với card NVIDIA, trang **PCIe monitor** ghi lưu lượng 4 lần mỗi giây khi bạn chơi game. Đồ thị tô đỏ những lúc bị nghẽn, kèm nhật ký từng lần nghẽn và nút xuất file CSV.
 
 ![Trang PCIe monitor: các thẻ Link limit, Now, Average, Peak, Bottleneck time và đồ thị lưu lượng PCIe trong 2 phút](../../assets/uploads/gpu-toggle-pcie.png)
-*PCIe monitor sau 2 phút ghi. Giới hạn đo thực tế là 3,32 GB/s (42 % link), nên app tự đặt ngưỡng nghẽn ở 41 %. Lúc chụp máy chỉ chạy desktop nên lưu lượng còn thấp.*
+*PCIe monitor vừa bắt đầu ghi. Giới hạn đo thực tế là 3,86 GB/s (49 % link), nên app tự đặt ngưỡng nghẽn ở 48 %. Lúc chụp máy chỉ chạy desktop nên lưu lượng gần như bằng 0.*
 
 ## OSD trong game
 
