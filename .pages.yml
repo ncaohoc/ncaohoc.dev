@@ -163,7 +163,7 @@ content:
         label: Link tải về
         type: string
       - name: version
-        label: Phiên bản mới nhất
+        label: Phiên bản mới nhất (bỏ trống nếu đã có bài trong "Bản cập nhật")
         type: string
       - name: order
         label: Thứ tự (số nhỏ xếp trước)
@@ -182,6 +182,60 @@ content:
         default: false
       - name: body
         label: Nội dung
+        type: rich-text
+        options:
+          format: markdown
+
+  # Mỗi phiên bản một bài, hiện nối dài dưới trang dự án (mới nhất trên cùng, bản cũ gom vào "Xem thêm").
+  # Phiên bản mới nhất ở đây tự hiện trên nút "Tải về" của dự án.
+  - name: updates
+    label: Bản cập nhật
+    type: collection
+    path: src/content/updates
+    exclude: [.gitkeep]
+    filename:
+      template: "{primary}.md"
+      field: create
+    view:
+      fields: [title, version, date, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: project
+        label: Dự án
+        type: reference
+        required: true
+        options:
+          collection: projects
+          search: title
+          value: "{path}"
+          label: "{title}"
+      - name: version
+        label: Phiên bản (vd. 1.0.2, không có chữ v)
+        type: string
+        required: true
+      - name: title
+        label: Tên ngắn cho bản này
+        type: string
+        required: true
+      - name: description
+        label: Một câu tóm tắt
+        type: text
+      - name: date
+        label: Ngày phát hành
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: draft
+        label: Bản nháp (chưa hiện trên site)
+        type: boolean
+        default: false
+      - name: body
+        label: Nội dung (tiêu đề nhỏ trong bài dùng ####)
         type: rich-text
         options:
           format: markdown

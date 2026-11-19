@@ -4,11 +4,13 @@ import Base from '../layouts/Base.astro';
 import Seal from '../components/Seal.astro';
 import EntryList from '../components/EntryList.astro';
 import ProjectCards from '../components/ProjectCards.astro';
+import { latestVersions } from '../lib/updates';
 import { SITE, published, byProjectOrder, projectCard } from '../site';
 import AlbumGrid from '../components/AlbumGrid.astro';
 
 const posts = published(await getCollection('blog')).slice(0, 5);
 const sheets = published(await getCollection('cheatsheets')).slice(0, 6);
+const versions = await latestVersions();
 const projects = published(await getCollection('projects'))
   .sort(byProjectOrder)
   .slice(0, 4);
@@ -53,7 +55,7 @@ const albums = published(await getCollection('albums')).slice(0, 3);
 
     <section class="section">
       <h2><a href="/projects/">Dự án</a><small>Đang làm và đã xong</small></h2>
-      <ProjectCards items={projects.map(projectCard)} />
+      <ProjectCards items={projects.map(projectCard(versions))} />
     </section>
 
     {

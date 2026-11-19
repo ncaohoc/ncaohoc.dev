@@ -1,7 +1,9 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Post from '../../layouts/Post.astro';
+import UpdateLog from '../../components/UpdateLog.astro';
 import { published } from '../../site';
+import { getUpdates, versionAnchor } from '../../lib/updates';
 
 export async function getStaticPaths() {
   const projects = published(await getCollection('projects'));
@@ -12,15 +14,22 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 const d = entry.data;
 
+// Có bài cập nhật thì phiên bản và ngày cập nhật lấy từ bản mới nhất
+const updates = await getUpdates(entry.id);
+const latest = updates[0];
+const version = latest?.data.version ?? d.version;
+const updated = latest && (!d.updated || latest.data.date > d.updated) ? latest.data.date : d.updated;
+
 const aside = [
   { label: 'Trạng thái', value: d.status },
-  ...(d.version ? [{ label: 'Phiên bản', value: `v${d.version}` }] : []),
+  ...(version ? [{ label: 'Phiên bản', value: `v${version}` }] : []),
   ...(d.stack.length ? [{ label: 'Công nghệ', value: d.stack.join(', ') }] : []),
   ...(d.repo ? [{ label: 'Mã nguồn', value: 'GitHub', href: d.repo }] : []),
   ...(d.link ? [{ label: 'Xem thử', value: new URL(d.link).hostname, href: d.link }] : []),
 ];
 const actions = [
-  ...(d.download ? [{ label: d.version ? `Tải về v${d.version}` : 'Tải về', href: d.download, primary: true }] : []),
+  ...(d.download ? [{ label: version ? `Tải về v${version}` : 'Tải về', href: d.download, primary: true }] : []),
+  ...(latest ? [{ label: `Có gì mới ở v${latest.data.version}`, href: `#${versionAnchor(latest.data.version)}` }] : []),
   ...(d.repo ? [{ label: 'Mã nguồn trên GitHub', href: d.repo }] : []),
 ];
 ---
@@ -29,11 +38,12 @@ const actions = [
   title={d.title}
   description={d.description}
   date={d.date}
-  updated={d.updated}
+  updated={updated}
   tags={d.tags}
   aside={aside}
   actions={actions}
   back={{ href: '/projects/', label: 'Dự án' }}
 >
   <Content />
+  <UpdateLog updates={updates} />
 </Post>

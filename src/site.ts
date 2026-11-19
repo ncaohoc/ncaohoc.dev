@@ -45,8 +45,8 @@ export function byProjectOrder<T extends { data: { order: number; featured: bool
   return Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order;
 }
 
-// Dữ liệu một dự án cho ProjectCards
-export function projectCard(p: {
+// Dữ liệu một dự án cho ProjectCards. `versions`: phiên bản mới nhất lấy từ bài cập nhật (xem lib/updates.ts)
+export const projectCard = (versions: Map<string, string>) => (p: {
   id: string;
   data: {
     title: string;
@@ -58,7 +58,7 @@ export function projectCard(p: {
     version?: string;
     featured: boolean;
   };
-}) {
+}) => {
   return {
     href: `/projects/${p.id}/`,
     title: p.data.title,
@@ -67,7 +67,7 @@ export function projectCard(p: {
     stack: p.data.stack,
     repo: p.data.repo,
     download: p.data.download,
-    version: p.data.version,
+    version: versions.get(p.id) ?? p.data.version,
     featured: p.data.featured,
   };
-}
+};

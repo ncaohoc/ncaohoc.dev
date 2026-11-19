@@ -2,8 +2,10 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ProjectCards from '../../components/ProjectCards.astro';
+import { latestVersions } from '../../lib/updates';
 import { published, byProjectOrder, projectCard } from '../../site';
 
+const versions = await latestVersions();
 const projects = published(await getCollection('projects')).sort(byProjectOrder);
 ---
 
@@ -13,6 +15,6 @@ const projects = published(await getCollection('projects')).sort(byProjectOrder)
       <h1>Dự án</h1>
       <p>Game, công cụ và hạ tầng mình tự dựng. Mỗi trang có tiến độ và những gì học được.</p>
     </header>
-    <ProjectCards items={projects.map(projectCard)} />
+    <ProjectCards items={projects.map(projectCard(versions))} />
   </div>
 </Base>

@@ -17,6 +17,7 @@ Chạy `npm run build` sau mỗi thay đổi để kiểm tra schema nội dung 
 - `src/content.config.ts`: schema của các collection `blog`, `cheatsheets`, `projects`, `hobbies`, `albums`.
 - `src/content/<collection>/`: bài Markdown, tên file là slug. Album là file `.md` liệt kê ảnh trong `photos`; ảnh nằm ở `src/assets/uploads/` (xem `src/lib/albums.ts`).
 - `.pages.yml`: cấu hình Pages CMS (form thêm bài). Thêm hay đổi trường trong `src/content.config.ts` thì sửa cả file này. Schema coi `""`/`null` là ô trống vì Pages CMS ghi như vậy.
+- `src/content/updates/`: bản cập nhật của dự án, mỗi phiên bản một file, trường `project` là tên file dự án. Hiện dưới trang dự án qua `src/components/UpdateLog.astro`, phiên bản mới nhất lấy từ đây (`src/lib/updates.ts`). Dự án có phiên bản mới thì viết bài cập nhật, không sửa `version` trong file dự án.
 - `src/data/cv.ts`: nội dung trang CV. `src/pages/cv.astro` chỉ lo giao diện. Nút tải PDF chỉ hiện khi `cv.pdf` có giá trị. Bản PDF gốc có số điện thoại nằm trong `private/` (gitignore), không đưa lên repo.
 - `src/layouts/Base.astro`: khung trang, header, menu. Mục "Sở thích" tự ẩn khi chưa có bài hoặc album nào đã đăng.
 - `src/layouts/Post.astro`: trang bài viết. `wide` dùng cho cheatsheet: mục lục h2 dính bên trái, vạch đỏ chạy theo mục đang đọc.

@@ -1,4 +1,4 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 // Pages CMS ghi "" hoặc null cho ô để trống. Coi như không có giá trị để dùng mặc định.
@@ -39,9 +39,27 @@ const projects = defineCollection({
     repo: opt(z.string().url()),
     link: opt(z.string().url()),
     download: opt(z.string().url()), // link tải bản mới nhất (vd. file exe trên GitHub Releases)
-    version: opt(z.coerce.string()), // phiên bản mới nhất, vd. 1.0.0
+    version: opt(z.coerce.string()), // chỉ dùng khi dự án chưa có bài cập nhật nào; có rồi thì lấy bản mới nhất trong `updates`
     order: z.preprocess(empty, z.number().default(100)),
     featured: z.preprocess(empty, z.boolean().default(false)), // card lớn ở trang chủ và trang Dự án
+  }),
+});
+
+// Bản cập nhật của dự án: mỗi phiên bản một file, hiện nối dài dưới trang dự án (mới nhất trên cùng).
+// `project` là tên file dự án (vd. gpu-toggle-tools). Pages CMS ghi cả đường dẫn
+// (src/content/projects/gpu-toggle-tools.md) nên cắt lấy phần tên.
+const projectId = (v: unknown) =>
+  typeof v === 'string' ? v.replace(/^.*[\\/]/, '').replace(/\.mdx?$/, '') : v;
+
+const updates = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/updates' }),
+  schema: z.object({
+    project: z.preprocess(projectId, reference('projects')),
+    version: z.coerce.string(), // vd. 1.0.2, không có chữ v
+    title: z.string(), // tên ngắn cho bản này, vd. "Tự động hoá eGPU"
+    description: z.preprocess(empty, z.string().default('')), // một câu tóm tắt, dùng cho RSS
+    date: z.coerce.date(),
+    draft: draft(),
   }),
 });
 
@@ -75,4 +93,4 @@ const albums = defineCollection({
   }),
 });
 
-export const collections = { blog, cheatsheets, projects, hobbies, albums };
+export const collections = { blog, cheatsheets, projects, updates, hobbies, albums };

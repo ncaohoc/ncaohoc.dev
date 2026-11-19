@@ -37,6 +37,26 @@ draft: true        # bỏ dòng này khi muốn đăng
 
 Dự án có thêm `status` (`Đang làm`, `Hoàn thành`, `Tạm dừng`), `stack`, `repo`, `link` và `order` (số nhỏ xếp trước).
 
+### Bản cập nhật dự án
+
+Mỗi phiên bản mới của một dự án là một file trong `src/content/updates/`, ví dụ `gpu-toggle-tools-v1-0-2.md`:
+
+```yaml
+---
+project: gpu-toggle-tools   # tên file của dự án
+version: 1.0.2             # không có chữ v
+title: Tự động hoá eGPU    # tên ngắn cho bản này
+description: Một câu tóm tắt, dùng cho RSS
+date: 2026-11-19
+---
+```
+
+- Các bản hiện nối dài dưới trang dự án, mới nhất trên cùng. 3 bản mới nhất hiện sẵn, bản cũ hơn gom vào nút "Xem thêm".
+- Phiên bản mới nhất tự hiện trên nút "Tải về", ô "Phiên bản" và card dự án, nên không cần sửa `version` trong file dự án nữa.
+- Mỗi bản có anchor riêng, ví dụ `/projects/gpu-toggle-tools/#v1-0-2`, và có trong RSS.
+- Trong bài cập nhật, tiêu đề nhỏ dùng `####`.
+- Trang dự án nên giữ vai trò giới thiệu tổng quan, những gì mới của từng bản viết vào bài cập nhật.
+
 Cheatsheet có mục lục bên trái lấy từ các mục `##`, nên mỗi mục nên ngắn và độc lập.
 
 ## Thêm bài bằng form (Pages CMS)

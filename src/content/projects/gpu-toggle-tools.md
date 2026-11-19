@@ -2,11 +2,10 @@
 title: GPU Toggle Tools
 description: Công cụ miễn phí cho người dùng eGPU trên Windows. Bật/tắt GPU một cú bấm, chọn card cho từng game, đo băng thông PCIe, xem OSD ngay trong game để biết cái gì đang giới hạn FPS, và sửa lỗi Code 43.
 date: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-19
 status: Đang làm
 stack: [C#, WinForms, .NET Framework 4, Direct3D 11, NVML]
 repo: https://github.com/ncaohoc/GPUToggleTools
-version: 1.0.1
 download: https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe
 tags: [eGPU, Windows, Công cụ]
 order: 0
@@ -17,7 +16,7 @@ Cắm eGPU qua USB4 hay Thunderbolt giúp laptop mạnh hơn hẳn, nhưng đi k
 
 GPU Toggle Tools gom hết những việc đó vào một cửa sổ nhỏ. App là một file `.exe` duy nhất, không cần cài đặt, chạy trên Windows 10 (2004 trở lên) và Windows 11.
 
-> **Bản mới nhất: v1.0.1**, thêm trang **Repair** để gỡ sạch driver và sửa lỗi Code 43. [Tải GpuToggle.exe](https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe) (khoảng 310 KB), tải xong mở luôn. Ghi chú thay đổi và các bản cũ nằm ở trang [Releases](https://github.com/ncaohoc/GPUToggleTools/releases).
+> Bấm nút **Tải về** ở trên để lấy bản mới nhất, tải xong mở luôn. Những gì thay đổi qua từng bản nằm ở [Nhật ký cập nhật](#nhat-ky-cap-nhat) cuối trang.
 
 ## App giúp gì cho người dùng eGPU
 
@@ -28,6 +27,7 @@ GPU Toggle Tools gom hết những việc đó vào một cửa sổ nhỏ. App 
 | Tắt nhầm card, màn hình đen | Sau 15 giây không bấm **Keep**, GPU tự bật lại |
 | Không biết đường truyền eGPU có bị nghẽn | Đo băng thông PCIe thật và vẽ đồ thị lưu lượng khi chơi game |
 | FPS thấp mà không rõ lý do | OSD trong game cho biết FPS đang bị giới hạn bởi GPU, CPU, PCIe hay VRAM |
+| Quên Disable eGPU trước khi tắt máy | **Safe shut down** tự Disable eGPU rồi tắt máy, cắm lại thì app tự Enable |
 | eGPU báo lỗi Code 43, driver cài hỏng | Trang **Repair** gỡ sạch driver NVIDIA / AMD và thử sửa Code 43 từ nhẹ đến mạnh |
 
 ## Bật/tắt GPU
@@ -38,7 +38,7 @@ GPU Toggle Tools gom hết những việc đó vào một cửa sổ nhỏ. App 
 - Card NVIDIA hiện thêm nhiệt độ, công suất và tốc độ quạt.
 
 ![Trang GPUs của GPU Toggle Tools: bảng card đồ họa gồm iGPU AMD Radeon Graphics và eGPU NVIDIA GeForce RTX 5060 Ti, bên dưới là bảng màn hình](../../assets/uploads/gpu-toggle-gpus.png)
-*Trang GPUs: iGPU AMD và eGPU RTX 5060 Ti đều đang bật. Màn hình 1440p 144 Hz đang được eGPU xuất hình.*
+*Trang GPUs: iGPU AMD và eGPU RTX 5060 Ti đều đang bật, RTX 5060 Ti được đánh dấu là eGPU. Màn hình 1440p 144 Hz đang được eGPU xuất hình.*
 
 Hai chốt an toàn giúp bạn không bị kẹt:
 
@@ -126,7 +126,7 @@ Bước 4 chỉ chạy khi ô **I use an eGPU** được tick. App tự tick khi
 
 ## Mẹo khi dùng eGPU
 
-- **Rút eGPU trước khi tắt máy, cắm lại sau khi vào Windows.** Trước khi Shut down hay Restart, **Disable** eGPU trong app rồi rút dây. Mở máy, đăng nhập vào desktop xong mới cắm lại và **Enable**. eGPU có mặt lúc khởi động là nguyên nhân hay gặp của Code 43, màn hình đen và adapter "ma". Windows cũng hay coi đó là phần cứng thay đổi và bắt đặt lại PIN. Đây chính là việc app được làm ra để làm nhanh, thay cho Device Manager.
+- **Rút eGPU trước khi tắt máy, cắm lại sau khi vào Windows.** Trước khi Shut down hay Restart, **Disable** eGPU trong app rồi rút dây. Mở máy, đăng nhập vào desktop xong mới cắm lại và **Enable**. eGPU có mặt lúc khởi động là nguyên nhân hay gặp của Code 43, màn hình đen và adapter "ma". Windows cũng hay coi đó là phần cứng thay đổi và bắt đặt lại PIN. Từ bản 1.0.2 app làm thay việc này: tick cột **eGPU**, bật **Start with Windows**, rồi mỗi lần tắt máy bấm **Safe shut down**. Cắm eGPU lại thì app tự Enable. Xem [bản 1.0.2](#v1-0-2) để biết chi tiết.
 
 - **Cắm màn hình thẳng vào eGPU.** Nếu màn hình cắm vào laptop, hình phải chạy ngược từ eGPU về qua dây USB4, tốn thêm băng thông vốn đã hẹp.
 - **Trước khi tắt iGPU**, bấm `Win + P` và chọn *Second screen only*. Kiểm tra ở *Settings → System → Display → Advanced display* rằng màn hình ngoài đang *Connected to* card eGPU.
@@ -135,7 +135,7 @@ Bước 4 chỉ chạy khi ô **I use an eGPU** được tick. App tự tick khi
 ## Tải và chạy
 
 1. Tải [GpuToggle.exe bản mới nhất](https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/GpuToggle.exe). Link này luôn trỏ tới bản mới nhất, nên lưu lại để lần sau cập nhật.
-2. Mở file vừa tải. App cần quyền Administrator để bật/tắt thiết bị và sẽ tự xin quyền khi mở.
+2. Mở file vừa tải. App cần quyền Administrator để bật/tắt thiết bị và sẽ tự xin quyền khi mở. Bật **Start with Windows** thì chỉ phải cấp quyền một lần.
 3. Số phiên bản hiện ngay trên thanh tiêu đề, cạnh chữ GPU Toggle.
 
 > File exe chưa được ký số, nên lần đầu mở Windows SmartScreen có thể hiện cảnh báo. Bấm **More info → Run anyway** để chạy.

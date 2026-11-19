@@ -1,0 +1,215 @@
+---
+// Nhật ký cập nhật dưới trang dự án: vài bản mới nhất hiện đầy đủ, bản cũ hơn gom vào "Xem thêm".
+import { render } from 'astro:content';
+import { formatDate } from '../site';
+import { versionAnchor, type Update } from '../lib/updates';
+
+interface Props {
+  updates: Update[]; // đã sắp mới nhất lên trước
+  visible?: number; // số bản hiện sẵn
+}
+const { updates, visible = 3 } = Astro.props;
+
+const items = await Promise.all(
+  updates.map(async (u) => ({ u, Content: (await render(u)).Content, id: versionAnchor(u.data.version) })),
+);
+const shown = items.slice(0, visible);
+const older = items.slice(visible);
+---
+
+{
+  items.length > 0 && (
+    <section class="log" aria-labelledby="nhat-ky-cap-nhat">
+      <h2 id="nhat-ky-cap-nhat">Nhật ký cập nhật</h2>
+      <ol class="log-list">
+        {shown.map(({ u, Content, id }, i) => (
+          <li class="log-item" id={id}>
+            <header>
+              <span class:list={['ver', { latest: i === 0 }]}>v{u.data.version}</span>
+              <time datetime={u.data.date.toISOString()}>{formatDate(u.data.date)}</time>
+              {i === 0 && <span class="badge">Mới nhất</span>}
+            </header>
+            <h3>
+              <a href={`#${id}`}>{u.data.title}</a>
+            </h3>
+            <div class="body">
+              <Content />
+            </div>
+          </li>
+        ))}
+      </ol>
+      {older.length > 0 && (
+        <details class="older" data-older>
+          <summary>Xem {older.length} bản cũ hơn</summary>
+          <ol class="log-list">
+            {older.map(({ u, Content, id }) => (
+              <li class="log-item" id={id}>
+                <header>
+                  <span class="ver">v{u.data.version}</span>
+                  <time datetime={u.data.date.toISOString()}>{formatDate(u.data.date)}</time>
+                </header>
+                <h3>
+                  <a href={`#${id}`}>{u.data.title}</a>
+                </h3>
+                <div class="body">
+                  <Content />
+                </div>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </section>
+  )
+}
+
+<script>
+  // Link tới một bản cũ (vd. #v1-0-0) nằm trong phần đang gập thì mở ra rồi cuộn tới.
+  const openTarget = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const el = id && document.getElementById(id);
+    const box = el && el.closest<HTMLDetailsElement>('details[data-older]');
+    if (box && !box.open) {
+      box.open = true;
+      el.scrollIntoView();
+    }
+  };
+  openTarget();
+  window.addEventListener('hashchange', openTarget);
+</script>
+
+<style>
+  .log {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ink);
+  }
+  .log > h2 {
+    margin: 0 0 1.5rem;
+    font-size: var(--step-2);
+  }
+  .log-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .log-item {
+    position: relative;
+    padding: 0 0 2.25rem 1.5rem;
+    border-left: 1px solid var(--rule);
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  /* chấm trên đường thời gian */
+  .log-item::before {
+    content: '';
+    position: absolute;
+    top: 0.45rem;
+    left: -5px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--muted);
+  }
+  .log-item:has(.latest)::before {
+    background: var(--seal);
+    border-color: var(--seal);
+  }
+  .log-item header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .ver {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .ver.latest {
+    color: var(--seal);
+  }
+  .badge {
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: var(--seal-soft);
+    color: var(--seal);
+    font-weight: 600;
+  }
+  .log-item h3 {
+    margin: 0.35rem 0 0.75rem;
+    font-size: var(--step-1);
+  }
+  .log-item h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .log-item h3 a:hover {
+    text-decoration: underline;
+  }
+  .body > :global(:first-child) {
+    margin-top: 0;
+  }
+  .body > :global(:last-child) {
+    margin-bottom: 0;
+  }
+  /* giống nhịp đoạn của .prose (chỉ áp cho con trực tiếp nên phải đặt lại ở đây) */
+  .body > :global(* + *) {
+    margin-top: 1.1em;
+  }
+  .body :global(h4) {
+    margin: 1.5em 0 0.5em;
+    font-size: var(--step-0);
+  }
+  /* ảnh và chú thích in nghiêng ngay sau ảnh, cùng kiểu với .prose */
+  .body :global(p:has(> img)) {
+    margin-block: 1.5em;
+  }
+  .body :global(p:has(> img) img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-2);
+  }
+  .body :global(p:has(> img) > em) {
+    display: block;
+    margin-top: 0.85rem;
+    font-size: var(--step--1);
+    font-style: normal;
+    color: var(--muted);
+  }
+  .older summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .older summary::-webkit-details-marker {
+    display: none;
+  }
+  .older summary::before {
+    content: '▸';
+    color: var(--muted);
+    transition: transform 0.2s var(--ease);
+  }
+  .older[open] summary::before {
+    transform: rotate(90deg);
+  }
+  .older summary:hover {
+    border-color: var(--muted);
+  }
+  .older[open] summary {
+    margin-bottom: 2rem;
+  }
+</style>
