@@ -10,6 +10,7 @@ download: https://github.com/ncaohoc/GPUToggleTools/releases/latest/download/Gpu
 tags: [eGPU, Windows, Công cụ]
 order: 0
 featured: true
+ogImage: ../../assets/uploads/og-gpu-toggle.png
 ---
 
 Cắm eGPU qua USB4 hay Thunderbolt giúp laptop mạnh hơn hẳn, nhưng đi kèm nhiều phiền toái nhỏ. Game chạy nhầm sang iGPU. Muốn tắt iGPU thì phải mở Device Manager. Rút dây eGPU lúc card còn chạy thì Windows dễ treo. Và lúc FPS tụt, khó biết lỗi do card, do CPU hay do đường truyền USB4.

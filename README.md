@@ -35,7 +35,7 @@ draft: true        # bỏ dòng này khi muốn đăng
 ---
 ```
 
-Dự án có thêm `status` (`Đang làm`, `Hoàn thành`, `Tạm dừng`), `stack`, `repo`, `link` và `order` (số nhỏ xếp trước).
+Dự án có thêm `status` (`Đang làm`, `Hoàn thành`, `Tạm dừng`), `stack`, `repo`, `link`, `download`, `order` (số nhỏ xếp trước) và `ogImage` (ảnh khi chia sẻ link, nên 1200×627, giống blog).
 
 ### Bản cập nhật dự án
 

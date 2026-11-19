@@ -172,6 +172,9 @@ content:
         label: Nổi bật (card lớn ở trang chủ)
         type: boolean
         default: false
+      - name: ogImage
+        label: Ảnh chia sẻ (Facebook, LinkedIn), nên 1200×627
+        type: image
       - name: tags
         label: Thẻ
         type: string

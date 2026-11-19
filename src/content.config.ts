@@ -32,17 +32,19 @@ const cheatsheets = defineCollection({
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
-  schema: z.object({
-    ...base,
-    status: z.preprocess(empty, z.enum(['Đang làm', 'Hoàn thành', 'Tạm dừng']).default('Đang làm')),
-    stack: list(),
-    repo: opt(z.string().url()),
-    link: opt(z.string().url()),
-    download: opt(z.string().url()), // link tải bản mới nhất (vd. file exe trên GitHub Releases)
-    version: opt(z.coerce.string()), // chỉ dùng khi dự án chưa có bài cập nhật nào; có rồi thì lấy bản mới nhất trong `updates`
-    order: z.preprocess(empty, z.number().default(100)),
-    featured: z.preprocess(empty, z.boolean().default(false)), // card lớn ở trang chủ và trang Dự án
-  }),
+  schema: ({ image }) =>
+    z.object({
+      ...base,
+      ogImage: opt(image()), // ảnh hiện khi chia sẻ link (Facebook, LinkedIn...), nên 1200×627
+      status: z.preprocess(empty, z.enum(['Đang làm', 'Hoàn thành', 'Tạm dừng']).default('Đang làm')),
+      stack: list(),
+      repo: opt(z.string().url()),
+      link: opt(z.string().url()),
+      download: opt(z.string().url()), // link tải bản mới nhất (vd. file exe trên GitHub Releases)
+      version: opt(z.coerce.string()), // chỉ dùng khi dự án chưa có bài cập nhật nào; có rồi thì lấy bản mới nhất trong `updates`
+      order: z.preprocess(empty, z.number().default(100)),
+      featured: z.preprocess(empty, z.boolean().default(false)), // card lớn ở trang chủ và trang Dự án
+    }),
 });
 
 // Bản cập nhật của dự án: mỗi phiên bản một file, hiện nối dài dưới trang dự án (mới nhất trên cùng).
