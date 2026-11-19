@@ -97,6 +97,9 @@ FPS được đọc từ sự kiện mà Windows tự ghi lại (ETW, cùng các
 
 Bản 1.0.1 thêm trang **Repair**. Các công cụ ở đây can thiệp sâu vào hệ thống nên được tách riêng một trang. Mọi bước đều ghi vào ô **Log** ở cuối trang.
 
+![Trang Repair: bên trái là Driver cleanup với ô chọn NVIDIA, nút Remove driver và Restart to Safe Mode; bên phải là Fix code 43; dưới cùng là ô Log](../../assets/uploads/gpu-toggle-repair.png)
+*Trang Repair: gỡ sạch driver bên trái, sửa Code 43 bên phải. Lúc chụp không card nào bị lỗi 43 nên nút Fix code 43 đang mờ.*
+
 ### Gỡ sạch driver NVIDIA / AMD
 
 Làm việc giống DDU. Chọn hãng (app tự chọn theo card đang có) rồi bấm **Remove driver...**. App quét trước, ghi ra Log mọi thứ sẽ xoá, hỏi lại rồi mới làm:
@@ -142,7 +145,7 @@ Bước 4 chỉ chạy khi ô **I use an eGPU** được tick. App tự tick khi
 
 Mỗi bản phát hành trên trang [Releases](https://github.com/ncaohoc/GPUToggleTools/releases) có kèm mã SHA-256 của file exe, dùng để kiểm tra file tải về có đúng không.
 
-Muốn tự build từ mã nguồn thì cũng không cần Visual Studio hay .NET SDK: tải mã nguồn, chạy `build.bat`, script dùng trình biên dịch C# có sẵn trong Windows để tạo ra `GpuToggle.exe`.
+App là mã nguồn mở theo giấy phép MIT. Muốn tự build từ mã nguồn thì cũng không cần Visual Studio hay .NET SDK: tải mã nguồn, chạy `build.bat`, script dùng trình biên dịch C# có sẵn trong Windows để tạo ra `GpuToggle.exe`.
 
 Yêu cầu: Windows 10 bản 2004 trở lên hoặc Windows 11, .NET Framework 4.x (có sẵn trong Windows). Các thông số riêng của NVIDIA cần driver NVIDIA.
 
