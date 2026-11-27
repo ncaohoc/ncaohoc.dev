@@ -1,5 +1,6 @@
 // Nền x o dạng khối 3D (three.js) trên một canvas cố định phía sau nội dung.
-// o là hình xuyến, x là hai thanh hộp bắt chéo. Mỗi khối xoay trong không gian, phóng to rồi
+// Hình x và o dựng trong Blender (assets-src/xo/build_xo.py), cùng kiểu ống tròn, nạp từ /models/xo.glb;
+// không tải được file thì dùng hình xuyến và hai thanh hộp dựng sẵn bằng code. Mỗi khối xoay trong không gian, phóng to rồi
 // thu nhỏ tới biến mất theo vòng riêng; sương mù cùng màu nền làm khối ở xa mờ đi.
 // Màu lấy từ biến CSS --p-bg, --p-accent, --p-ink của trang.
 // Giảm chuyển động: vẽ một khung đứng yên. Không có WebGL: trả về false để giữ lớp x o phẳng.
@@ -20,6 +21,8 @@ import {
   type BufferGeometry,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import type { Mesh } from 'three';
 
 interface Item {
   x: number;
@@ -35,7 +38,7 @@ interface Item {
   drift: number;
 }
 
-export function startXo3d(canvas: HTMLCanvasElement): boolean {
+export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
   let renderer: WebGLRenderer;
   try {
     renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
@@ -57,11 +60,20 @@ export function startXo3d(canvas: HTMLCanvasElement): boolean {
   sun.position.set(4, 6, 8);
   scene.add(sun);
 
-  const torus = new TorusGeometry(0.5, 0.17, 18, 48);
-  const bar = new BoxGeometry(1.35, 0.3, 0.3);
-  const barB = bar.clone().rotateZ(Math.PI / 4);
-  const barA = bar.rotateZ(-Math.PI / 4);
-  const cross = mergeGeometries([barA, barB]) as BufferGeometry;
+  let torus: BufferGeometry;
+  let cross: BufferGeometry;
+  try {
+    const gltf = await new GLTFLoader().loadAsync('/models/xo.glb');
+    torus = (gltf.scene.getObjectByName('O') as Mesh).geometry;
+    cross = (gltf.scene.getObjectByName('X') as Mesh).geometry;
+    if (!torus || !cross) throw new Error('xo.glb thiếu mesh O hoặc X');
+  } catch {
+    torus = new TorusGeometry(0.5, 0.17, 18, 48);
+    const bar = new BoxGeometry(1.35, 0.3, 0.3);
+    const barB = bar.clone().rotateZ(Math.PI / 4);
+    const barA = bar.rotateZ(-Math.PI / 4);
+    cross = mergeGeometries([barA, barB]) as BufferGeometry;
+  }
 
   const phone = innerWidth < 640;
   const perGroup = phone ? 10 : 18;

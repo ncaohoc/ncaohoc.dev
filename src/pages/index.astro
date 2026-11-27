@@ -439,9 +439,9 @@ const arrow =
       // three.js nặng, nên chỉ tải khi trình duyệt rảnh, sau khi trang đã hiện
       const xoCanvas = document.querySelector<HTMLCanvasElement>('canvas.xo-3d');
       const startXo = () =>
-        import('../lib/xo-3d').then(({ startXo3d }) => {
-          if (xoCanvas && startXo3d(xoCanvas)) document.documentElement.classList.add('xo3d');
-        });
+        import('../lib/xo-3d')
+          .then(({ startXo3d }) => (xoCanvas ? startXo3d(xoCanvas) : false))
+          .then((ok) => ok && document.documentElement.classList.add('xo3d'));
       if ('requestIdleCallback' in window) requestIdleCallback(startXo, { timeout: 2000 });
       else setTimeout(startXo, 800);
       const nav = document.querySelector('header.nav');
