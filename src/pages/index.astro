@@ -50,26 +50,29 @@ const writing = [
   .slice(0, 3);
 const hobby = published(await getCollection('hobbies')).find((h) => h.id === 'hop-egpu-chong-bui');
 
-// Nền x o: 72 ký hiệu rải khắp trang, cỡ từ nhỏ đến to, càng to càng mờ và nhoè.
-// Mỗi cái chạy vòng riêng: phóng to hiện ra, trôi, rồi thu nhỏ biến mất; lệch pha nhau nhờ delay âm.
+// Nền x o phẳng (dự phòng khi không có WebGL): lưới 6 cột x 7 hàng trên cả trang, mỗi ô một ký hiệu lệch
+// ngẫu nhiên trong ô, nên rải đều và hiếm khi chồng nhau. Nhỏ là chính, mờ, vòng phóng to rồi biến mất.
 let seed = 1996;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-const xo = Array.from({ length: 72 }, (_, i) => {
+const XO_COLS = 6;
+const XO_ROWS = 7;
+const xo = Array.from({ length: XO_COLS * XO_ROWS }, (_, i) => {
   const k = rnd();
-  const size = Math.round(14 + k * k * 170);
+  const c = i % XO_COLS;
+  const r = Math.floor(i / XO_COLS);
   return {
-    kind: i % 2 ? 'o' : 'x',
+    kind: rnd() < 0.5 ? 'o' : 'x',
     accent: rnd() < 0.55,
-    size,
-    top: +(1 + rnd() * 97).toFixed(2),
-    left: +(-4 + rnd() * 100).toFixed(2),
-    op: +(0.24 - k * 0.14).toFixed(3),
-    sw: +(2.4 - k * 1.2).toFixed(2),
-    blur: +(k * k * 3).toFixed(1),
-    t: Math.round(7 + rnd() * 9),
-    dy: Math.round(-14 - rnd() * 26),
-    r: Math.round(-30 + rnd() * 60),
-    delay: +(rnd() * 16).toFixed(1),
+    size: Math.round(12 + k * k * 46),
+    top: +(((r + 0.5 + (rnd() - 0.5) * 0.8) / XO_ROWS) * 100).toFixed(2),
+    left: +(((c + 0.5 + (rnd() - 0.5) * 0.8) / XO_COLS) * 100 - 2).toFixed(2),
+    op: +(0.16 - k * 0.06).toFixed(3),
+    sw: +(2.4 - k * 0.8).toFixed(2),
+    blur: +(k * 0.8).toFixed(1),
+    t: Math.round(9 + rnd() * 9),
+    dy: Math.round(-6 - rnd() * 10),
+    r: Math.round(-20 + rnd() * 40),
+    delay: +(rnd() * 18).toFixed(1),
   };
 });
 

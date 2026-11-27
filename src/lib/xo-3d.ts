@@ -25,8 +25,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Mesh } from 'three';
 
 interface Item {
-  x: number;
-  y: number;
+  nx: number; // vị trí theo màn hình, -1..1, đổi ra toạ độ thế giới mỗi khung theo tỉ lệ khung hình
+  ny: number;
   z: number;
   rx: number;
   ry: number;
@@ -52,7 +52,7 @@ export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
   const ink = new Color(token('--p-ink', '#ffffff'));
 
   const scene = new Scene();
-  scene.fog = new Fog(bg, 6, 22);
+  scene.fog = new Fog(bg, 7, 18);
   const camera = new PerspectiveCamera(50, 1, 0.1, 40);
   camera.position.z = 10;
   scene.add(new AmbientLight(0xffffff, 0.55));
@@ -75,38 +75,43 @@ export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
     cross = mergeGeometries([barA, barB]) as BufferGeometry;
   }
 
+  // Rải đều và thưa: chia màn hình thành lưới, mỗi ô nhiều nhất một khối, lệch ngẫu nhiên trong ô,
+  // nên không chỗ nào dồn nhiều khối, chỉ thỉnh thoảng hai khối chạm nhẹ nhau.
   const phone = innerWidth < 640;
-  const perGroup = phone ? 10 : 18;
+  const cols = phone ? 3 : 8;
+  const rows = phone ? 5 : 4;
   const mat = (c: Color) =>
-    new MeshStandardMaterial({ color: c, roughness: 0.35, metalness: 0.25, transparent: true, opacity: 0.42 });
-  const groups = [
-    { mesh: new InstancedMesh(torus, mat(accent), perGroup), items: [] as Item[] },
-    { mesh: new InstancedMesh(cross, mat(accent), perGroup), items: [] as Item[] },
-    { mesh: new InstancedMesh(torus, mat(ink), perGroup), items: [] as Item[] },
-    { mesh: new InstancedMesh(cross, mat(ink), perGroup), items: [] as Item[] },
-  ];
+    new MeshStandardMaterial({ color: c, roughness: 0.4, metalness: 0.2, transparent: true, opacity: 0.22 });
 
   let seed = 1996;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (const g of groups) {
-    for (let i = 0; i < perGroup; i++) {
+  const buckets: Item[][] = [[], [], [], []]; // o xanh, x xanh, o trắng, x trắng
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // vùng giữa là chỗ chữ nằm: bỏ trống một nửa số ô ở đó để khối dồn ra hai bên
+      const middle = phone ? c === 1 : c >= 2 && c <= cols - 3;
+      if (middle && rnd() < 0.5) continue;
       const k = rnd();
-      g.items.push({
-        x: -9 + rnd() * 18,
-        y: -6 + rnd() * 12,
-        z: -12 + rnd() * 10,
+      const item: Item = {
+        nx: -1 + ((c + 0.5 + (rnd() - 0.5) * 0.8) / cols) * 2,
+        ny: -1 + ((r + 0.5 + (rnd() - 0.5) * 0.8) / rows) * 2,
+        z: -4 + rnd() * 5,
         rx: rnd() * Math.PI * 2,
         ry: rnd() * Math.PI * 2,
-        sx: -0.6 + rnd() * 1.2,
-        sy: -0.6 + rnd() * 1.2,
-        size: 0.35 + k * k * 1.6, // nhiều cái nhỏ, ít cái to
-        period: 7 + rnd() * 9,
+        sx: -0.35 + rnd() * 0.7,
+        sy: -0.35 + rnd() * 0.7,
+        size: 0.18 + k * k * 0.42, // nhỏ là chính, to nhất bằng khoảng một phần ba trước
+        period: 9 + rnd() * 9,
         phase: rnd(),
-        drift: 0.3 + rnd() * 0.8,
-      });
+        drift: 0.1 + rnd() * 0.25,
+      };
+      buckets[(r * cols + c + Math.floor(rnd() * 4)) % 4].push(item);
     }
-    scene.add(g.mesh);
   }
+  const geos = [torus, cross, torus, cross];
+  const cols4 = [accent, accent, ink, ink];
+  const groups = buckets.map((items, i) => ({ mesh: new InstancedMesh(geos[i], mat(cols4[i]), Math.max(1, items.length)), items }));
+  groups.forEach((g) => scene.add(g.mesh));
 
   const dummy = new Object3D();
   const m = new Matrix4();
@@ -116,7 +121,8 @@ export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
         // Vòng 0..1: phóng to hiện ra, giữ, thu nhỏ tới 0
         const p = (t / it.period + it.phase) % 1;
         const s = p < 0.3 ? p / 0.3 : p > 0.7 ? (1 - p) / 0.3 : 1 + 0.15 * Math.sin(((p - 0.3) / 0.4) * Math.PI);
-        dummy.position.set(it.x, it.y + p * it.drift, it.z);
+        const halfH = Math.tan((camera.fov * Math.PI) / 360) * (camera.position.z - it.z) * 0.94;
+        dummy.position.set(it.nx * halfH * camera.aspect, it.ny * halfH + p * it.drift, it.z);
         dummy.rotation.set(it.rx + t * it.sx, it.ry + t * it.sy, 0);
         dummy.scale.setScalar(it.size * Math.max(s, 0.0001));
         dummy.updateMatrix();
