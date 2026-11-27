@@ -50,10 +50,11 @@ const writing = [
   .slice(0, 3);
 const hobby = published(await getCollection('hobbies')).find((h) => h.id === 'hop-egpu-chong-bui');
 
-// Nền x o: 34 ký hiệu rải khắp trang, cỡ từ nhỏ đến to, càng to càng mờ và nhoè
+// Nền x o: 72 ký hiệu rải khắp trang, cỡ từ nhỏ đến to, càng to càng mờ và nhoè.
+// Mỗi cái chạy vòng riêng: phóng to hiện ra, trôi, rồi thu nhỏ biến mất; lệch pha nhau nhờ delay âm.
 let seed = 1996;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-const xo = Array.from({ length: 34 }, (_, i) => {
+const xo = Array.from({ length: 72 }, (_, i) => {
   const k = rnd();
   const size = Math.round(14 + k * k * 170);
   return {
@@ -62,13 +63,13 @@ const xo = Array.from({ length: 34 }, (_, i) => {
     size,
     top: +(1 + rnd() * 97).toFixed(2),
     left: +(-4 + rnd() * 100).toFixed(2),
-    op: +(0.16 - k * 0.11).toFixed(3),
+    op: +(0.24 - k * 0.14).toFixed(3),
     sw: +(2.4 - k * 1.2).toFixed(2),
     blur: +(k * k * 3).toFixed(1),
-    t: Math.round(12 + rnd() * 14),
-    dy: Math.round(-10 - rnd() * 18),
-    r: Math.round(-12 + rnd() * 24),
-    delay: Math.round(rnd() * 20),
+    t: Math.round(7 + rnd() * 9),
+    dy: Math.round(-14 - rnd() * 26),
+    r: Math.round(-30 + rnd() * 60),
+    delay: +(rnd() * 16).toFixed(1),
   };
 });
 
@@ -162,14 +163,23 @@ const arrow =
       /* Hiện dần khi cuộn tới (src/lib/reveal.ts) */
       .rv-on [data-rv] { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--rv-i, 0) * 60ms); }
       .rv-on [data-rv].rv-in { opacity: 1; transform: none; }
-      /* Nền x o mờ, nhiều cỡ, trôi chậm */
+      /* Nền x o mờ, nhiều cỡ: phóng to hiện ra, trôi, thu nhỏ rồi biến mất */
       body { position: relative; }
       .xo-ground { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-      .xo-ground svg { position: absolute; fill: none; stroke: currentColor; stroke-linecap: round; animation: xo-drift var(--xo-t) ease-in-out infinite alternate; }
+      .xo-ground svg { position: absolute; fill: none; stroke: currentColor; stroke-linecap: round; opacity: 0; transform-origin: center; animation: xo-pulse var(--xo-t) ease-in-out infinite; will-change: transform, opacity; }
       .xo-ground .xo-a { color: var(--p-accent); }
       .xo-ground .xo-i { color: var(--p-ink); }
-      @keyframes xo-drift { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(var(--xo-dy)) rotate(var(--xo-r)); } }
-      @media (prefers-reduced-motion: reduce) { .xo-ground svg { animation: none; } }
+      @keyframes xo-pulse {
+        0% { opacity: 0; transform: translateY(0) scale(0.3) rotate(0deg); }
+        30% { opacity: var(--xo-o); transform: translateY(calc(var(--xo-dy) * 0.35)) scale(1) rotate(calc(var(--xo-r) * 0.35)); }
+        70% { opacity: var(--xo-o); transform: translateY(calc(var(--xo-dy) * 0.75)) scale(1.18) rotate(calc(var(--xo-r) * 0.75)); }
+        100% { opacity: 0; transform: translateY(var(--xo-dy)) scale(0.2) rotate(var(--xo-r)); }
+      }
+      @media (prefers-reduced-motion: reduce) { .xo-ground svg { animation: none; opacity: var(--xo-o); } }
+      /* Bản 3D (src/lib/xo-3d.ts) thay lớp phẳng khi WebGL chạy được */
+      .xo-3d { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s var(--ease); }
+      .xo3d .xo-3d { opacity: 1; }
+      .xo3d .xo-ground { display: none; }
       #ghi-chep .frame > img { object-position: 50% 78%; }
       /* Con dấu 高學 của site, đổi sang màu nhấn mệnh Thủy */
       :root { --seal: var(--p-accent); --seal-cut: var(--p-bg); }
@@ -179,11 +189,12 @@ const arrow =
     </style>
   </head>
   <body>
+    <canvas class="xo-3d" aria-hidden="true"></canvas>
     <div class="xo-ground" aria-hidden="true">
       {
         xo.map((g) => (
           <svg class={g.accent ? 'xo-a' : 'xo-i'} viewBox="0 0 24 24" width={g.size} height={g.size}
-            style={`top:${g.top}%;left:${g.left}%;opacity:${g.op};stroke-width:${g.sw};filter:blur(${g.blur}px);--xo-t:${g.t}s;--xo-dy:${g.dy}px;--xo-r:${g.r}deg;animation-delay:-${g.delay}s`}>
+            style={`top:${g.top}%;left:${g.left}%;--xo-o:${g.op};stroke-width:${g.sw};filter:blur(${g.blur}px);--xo-t:${g.t}s;--xo-dy:${g.dy}px;--xo-r:${g.r}deg;animation-delay:-${g.delay}s`}>
             {g.kind === 'x' ? <path d="M5 5 19 19M19 5 5 19" /> : <circle cx="12" cy="12" r="8" />}
           </svg>
         ))
@@ -425,6 +436,14 @@ const arrow =
       import { lockWhileClass } from '../lib/lock-under';
       import { revealOnScroll } from '../lib/reveal';
       revealOnScroll();
+      // three.js nặng, nên chỉ tải khi trình duyệt rảnh, sau khi trang đã hiện
+      const xoCanvas = document.querySelector<HTMLCanvasElement>('canvas.xo-3d');
+      const startXo = () =>
+        import('../lib/xo-3d').then(({ startXo3d }) => {
+          if (xoCanvas && startXo3d(xoCanvas)) document.documentElement.classList.add('xo3d');
+        });
+      if ('requestIdleCallback' in window) requestIdleCallback(startXo, { timeout: 2000 });
+      else setTimeout(startXo, 800);
       const nav = document.querySelector('header.nav');
       if (nav) lockWhileClass(nav, 'is-open');
     </script>
