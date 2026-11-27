@@ -24,6 +24,17 @@
     "markUrl": "https://www.ethereum.org/"
   },
   {
+    "file": "file-sqlite.svg",
+    "icon": "file:file-type-sqlite",
+    "name": "Sqlite",
+    "kind": "colour",
+    "source": "@iconify-json/vscode-icons@1.2.30",
+    "author": "Roberto Huertas",
+    "licence": "MIT",
+    "url": "https://github.com/vscode-icons/vscode-icons",
+    "trademark": false
+  },
+  {
     "file": "firebase.svg",
     "icon": "logos:firebase-icon",
     "name": "Firebase",
@@ -70,6 +81,28 @@
     "url": "https://github.com/gilbarbara/logos",
     "trademark": true,
     "markUrl": "https://www.sqlite.org/"
+  },
+  {
+    "file": "ui-book-open.svg",
+    "icon": "ui:book-open",
+    "name": "Book Open",
+    "kind": "line",
+    "source": "@iconify-json/lucide@1.2.100",
+    "author": "Lucide Contributors",
+    "licence": "ISC",
+    "url": "https://github.com/lucide-icons/lucide",
+    "trademark": false
+  },
+  {
+    "file": "ui-file-code.svg",
+    "icon": "ui:file-code",
+    "name": "File Code",
+    "kind": "line",
+    "source": "@iconify-json/lucide@1.2.100",
+    "author": "Lucide Contributors",
+    "licence": "ISC",
+    "url": "https://github.com/lucide-icons/lucide",
+    "trademark": false
   },
   {
     "file": "ui-network.svg",

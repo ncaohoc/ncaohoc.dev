@@ -30,10 +30,11 @@ const sheets = published(await getCollection('cheatsheets'));
 const unitySheets = sheets.filter((s) => s.id.startsWith('unity-'));
 const otherSheets = sheets.filter((s) => !s.id.startsWith('unity-'));
 const ICONS: Record<string, { src: string; cls?: string; name: string }> = {
+  unity: { src: '/assets/icons/unity.svg', cls: 'ic-ink', name: 'Unity' },
   blender: { src: '/assets/icons/blender.svg', name: 'Blender' },
   git: { src: '/assets/icons/git.svg', name: 'Git' },
   firebase: { src: '/assets/icons/firebase.svg', cls: 'ic-tall', name: 'Firebase' },
-  'sql-sqlite': { src: '/assets/icons/sqlite.svg', cls: 'ic-wide', name: 'SQLite' },
+  'sql-sqlite': { src: '/assets/icons/file-sqlite.svg', name: 'SQLite' },
   web3: { src: '/assets/icons/ethereum.svg', cls: 'ic-tall', name: 'Ethereum' },
   'mang-may-tinh': { src: '/assets/icons/ui-network.svg', cls: 'ic-ink', name: 'Mạng máy tính' },
 };
@@ -85,6 +86,7 @@ const arrow =
     <link rel="stylesheet" href="/assets/backgrounds/backgrounds.css" />
     <link rel="stylesheet" href="/assets/layout/layout.css" />
     <link rel="stylesheet" href="/assets/icons/icon.css" />
+    <link rel="stylesheet" href="/assets/diagrams/diagram.css" />
     <!-- :root đúng như start.mjs brand in ra: màu mệnh Thủy chủ site chọn (nền xanh biển đêm, nhấn xanh nước), cặp font mona -->
     <style is:inline>
       :root {
@@ -111,11 +113,14 @@ const arrow =
     <!-- CSS của trang: chỉ phần nằm trong hình và chiều cao panel của từng nhóm thẻ -->
     <style is:inline>
       .nav .menu-card .panel { --p-h: 200px; }
-      #kien-thuc .kt-group { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-4); font: 500 var(--t-label)/1.4 var(--font-text); color: var(--muted); }
+      #kien-thuc .panel { --p-h: 444px; }
       #kien-thuc .rows { margin: 0; padding: 0; list-style: none; }
-      #kien-thuc .rows__name { display: flex; align-items: center; gap: var(--s-3); min-height: 44px; }
-      #kien-thuc .rows__name .ic { flex: none; width: 24px; height: 24px; object-fit: contain; }
-      #kien-thuc .rows__name .ic.ic-wide { width: 40px; height: 18px; }
+      #kien-thuc .rows > li { padding-block: 0; }
+      #kien-thuc .rows__name { display: flex; align-items: center; gap: var(--s-3); min-height: 37px; }
+      #kien-thuc .rows__name .ic { flex: none; width: 20px; height: 20px; object-fit: contain; }
+      @media (max-width: 639px) { #kien-thuc .rows__name { min-height: 44px; } #kien-thuc .panel { --p-h: 560px; } }
+      /* điện thoại: pinned-chapters đứng yên và tự co chiều cao, giữ đúng hai màn hình như --hm: 2 */
+      @media (max-width: 639px) { main > #gpu-toggle[data-moment]:not(.is-live) { min-height: 200lvh; } #gpu-toggle:not(.is-live) .mo-pc__visual > img { max-height: 34svh; } }
       #contact .close__word { overflow: visible; }
       #ghi-chep .frame > img { object-position: 50% 78%; }
     </style>
@@ -252,30 +257,22 @@ const arrow =
             <a class="link" href="/kien-thuc/">Xem tất cả ghi chú</a>
           </div>
           <div class="grid grid--top">
-            <div class="span-6">
-              <h3 class="kt-group"><img class="ic ic-24 ic-ink" src="/assets/icons/unity.svg" alt="" width="24" height="24" />Unity</h3>
-              <ul class="rows">
-                {unitySheets.map((s) => <li><a class="rows__name" href={`/kien-thuc/${s.id}/`}>{s.data.title}</a></li>)}
-              </ul>
-            </div>
-            <div class="span-6 start-7">
-              <h3 class="kt-group">Công cụ và nền tảng khác</h3>
-              <ul class="rows">
-                {
-                  otherSheets.map((s) => {
-                    const ic = ICONS[s.id];
-                    return (
-                      <li>
-                        <a class="rows__name" href={`/kien-thuc/${s.id}/`}>
-                          {ic && <img class={`ic ic-24 ${ic.cls ?? ''}`} src={ic.src} alt="" width="24" height="24" />}
-                          {s.data.title}
-                        </a>
-                      </li>
-                    );
-                  })
-                }
-              </ul>
-            </div>
+            <div class="panel span-6"><div class="dg" data-diagram><script type="application/json">{"layout": "hub", "alt": "Các ghi chú toả ra từ một mục: Unity với DOTS và shader, cùng Blender, Git, Firebase, SQLite và Web3.", "center": {"label": "Ghi chú", "icon": "ui:book-open"}, "spokes": [{"label": "Unity", "icon": "unity", "children": [{"label": "DOTS", "icon": "ui:file-code"}, {"label": "Shader", "icon": "ui:file-code"}]}, {"label": "Blender", "icon": "blender"}, {"label": "Git", "icon": "git"}, {"label": "Firebase", "icon": "firebase"}, {"label": "SQLite", "icon": "file:sqlite"}, {"label": "Web3", "icon": "ethereum"}]}</script></div></div>
+            <ul class="rows span-6 start-7">
+              {
+                [...unitySheets, ...otherSheets].map((s) => {
+                  const ic = s.id.startsWith('unity-') ? ICONS.unity : ICONS[s.id];
+                  return (
+                    <li>
+                      <a class="rows__name" href={`/kien-thuc/${s.id}/`}>
+                        {ic && <img class={`ic ic-24 ${ic.cls ?? ''}`} src={ic.src} alt="" width="24" height="24" />}
+                        {s.data.title}
+                      </a>
+                    </li>
+                  );
+                })
+              }
+            </ul>
           </div>
         </div>
       </section>
@@ -363,6 +360,7 @@ const arrow =
     <script is:inline type="module" src="/assets/system.js"></script>
     <script is:inline type="module" src="/assets/motion/motion.js"></script>
     <script is:inline type="module" src="/assets/layout/layout.js"></script>
+    <script is:inline type="module" src="/assets/diagrams/mount.js"></script>
     <script>
       // Menu điện thoại của kit mở bằng class .is-open: khoá phần bên dưới bằng helper dùng chung
       import { lockWhileClass } from '../lib/lock-under';
