@@ -46,7 +46,7 @@ export interface XoOptions {
 
 export async function startXo3d(canvas: HTMLCanvasElement, opts: XoOptions = {}): Promise<boolean> {
   const opacity = opts.opacity ?? 0.22;
-  const middleGap = opts.middleGap ?? 0.5;
+  const middleGap = opts.middleGap ?? 0.35;
   let renderer: WebGLRenderer;
   try {
     renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
@@ -98,8 +98,8 @@ export async function startXo3d(canvas: HTMLCanvasElement, opts: XoOptions = {})
   // Rải đều và thưa: chia màn hình thành lưới, mỗi ô nhiều nhất một khối, lệch ngẫu nhiên trong ô,
   // nên không chỗ nào dồn nhiều khối, chỉ thỉnh thoảng hai khối chạm nhẹ nhau.
   const phone = innerWidth < 640;
-  const cols = phone ? 3 : 8;
-  const rows = phone ? 5 : 4;
+  const cols = phone ? 4 : 10;
+  const rows = phone ? 6 : 5;
   const mat = (c: Color) =>
     new MeshStandardMaterial({ color: c, roughness: 0.4, metalness: 0.2, transparent: true, opacity });
 
@@ -108,8 +108,8 @@ export async function startXo3d(canvas: HTMLCanvasElement, opts: XoOptions = {})
   const buckets: Item[][] = [[], [], [], []]; // o xanh, x xanh, o trắng, x trắng
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      // vùng giữa là chỗ chữ nằm: bỏ trống một nửa số ô ở đó để khối dồn ra hai bên
-      const middle = phone ? c === 1 : c >= 2 && c <= cols - 3;
+      // vùng giữa là chỗ chữ nằm: bỏ trống một phần số ô ở đó để khối dồn ra hai bên
+      const middle = phone ? c === 1 || c === 2 : c >= 3 && c <= cols - 4;
       if (middle && rnd() < middleGap) continue;
       const k = rnd();
       const item: Item = {
@@ -126,6 +126,22 @@ export async function startXo3d(canvas: HTMLCanvasElement, opts: XoOptions = {})
         drift: 0.1 + rnd() * 0.25,
       };
       buckets[(r * cols + c + Math.floor(rnd() * 4)) % 4].push(item);
+      // khoảng 1/4 số ô có thêm một khối nhỏ đi kèm, nằm sát và đè nhẹ lên khối chính
+      if (rnd() < 0.27) {
+        const a = rnd() * Math.PI * 2;
+        const gap = (0.35 + rnd() * 0.25) / cols;
+        buckets[Math.floor(rnd() * 4)].push({
+          ...item,
+          nx: item.nx + Math.cos(a) * gap * 2,
+          ny: item.ny + Math.sin(a) * gap * 2 * (cols / rows) * 0.6,
+          z: item.z + (rnd() - 0.5) * 0.8,
+          rx: rnd() * Math.PI * 2,
+          ry: rnd() * Math.PI * 2,
+          size: 0.12 + rnd() * 0.16,
+          period: 9 + rnd() * 9,
+          phase: rnd(),
+        });
+      }
     }
   }
   const geos = [torus, cross, torus, cross];

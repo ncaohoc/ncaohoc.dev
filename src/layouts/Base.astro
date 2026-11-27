@@ -132,7 +132,7 @@ const nav = NAV.filter(
       const xoCanvas = document.querySelector<HTMLCanvasElement>('canvas.xo-3d');
       const startXo = () =>
         import('../lib/xo-3d')
-          .then(({ startXo3d }) => (xoCanvas ? startXo3d(xoCanvas, { opacity: 0.14, middleGap: 0.85 }) : false))
+          .then(({ startXo3d }) => (xoCanvas ? startXo3d(xoCanvas, { opacity: 0.14, middleGap: 0.6 }) : false))
           .then((ok) => ok && document.documentElement.classList.add('xo3d'));
       if ('requestIdleCallback' in window) requestIdleCallback(startXo, { timeout: 2500 });
       else setTimeout(startXo, 1000);
