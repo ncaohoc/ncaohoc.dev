@@ -1,11 +1,85 @@
 ---
 title: "Rust từ cơ bản đến nâng cao"
-description: "Cargo, ownership, borrow, lifetime, trait, generic, xử lý lỗi, collection, iterator, smart pointer, concurrency, async và unsafe trong Rust."
+description: "Vì sao Rust nhanh mà an toàn, Rust dùng vào việc gì, rồi Cargo, ownership, borrow, lifetime, trait, generic, xử lý lỗi, collection, iterator, smart pointer, concurrency, async và unsafe trong Rust."
 date: 2026-11-28
 tags: [Rust, Cargo, Systems]
 ---
 
-## 1. Cài đặt & Cargo
+## 1. Vì sao Rust nhanh mà vẫn an toàn
+
+Từ trước tới nay, chọn ngôn ngữ thường phải đánh đổi một trong hai thứ:
+
+- **C/C++:** rất nhanh, tự quản lý bộ nhớ. Đổi lại là use-after-free, tràn bộ đệm, data race. Microsoft và Google từng công bố khoảng **70% lỗ hổng bảo mật nghiêm trọng** trong sản phẩm của họ là lỗi an toàn bộ nhớ.
+- **C#, Java, Go:** an toàn nhờ garbage collector (GC). Đổi lại là GC thỉnh thoảng dừng chương trình để dọn rác, tốn RAM và khó đoán thời gian. Làm game Unity thì ai cũng từng gặp frame bị giật vì GC.
+
+Rust lấy được cả hai: **tốc độ ngang C++, an toàn ngang C#, không có GC.** Bí quyết là dời việc kiểm tra từ lúc chạy sang lúc biên dịch. Mổ xẻ từng phần:
+
+**1. Không GC, không runtime.** Bộ nhớ được giải phóng đúng lúc biến ra khỏi scope, tại vị trí compiler đã biết trước (giống RAII của C++ nhưng được ép buộc). Không có luồng dọn rác chạy nền, không có lần dừng nào khó đoán. Binary Rust chỉ là mã máy, khởi động gần như tức thì.
+
+**2. Ownership kiểm tra lúc biên dịch, chạy thì miễn phí.** Borrow checker chứng minh không có con trỏ treo, không giải phóng hai lần, không data race. Phép kiểm tra này nằm hoàn toàn ở compiler, file chạy không chứa thêm lệnh nào. Viết code sai thì không biên dịch được, chứ không phải đợi tới lúc crash trên máy người chơi.
+
+**3. Biết chắc không ai khác đang sửa, compiler tối ưu mạnh tay hơn.** Luật "nhiều `&T` hoặc đúng một `&mut T`" cho compiler biết hai tham chiếu không trỏ cùng chỗ (không aliasing). Trong C++ compiler phải đoán dè dặt, phải đọc lại bộ nhớ sau mỗi lần ghi. Rust gắn thông tin `noalias` cho LLVM, nên giữ được giá trị trong thanh ghi và vector hoá vòng lặp dễ hơn.
+
+**4. Zero-cost abstraction.** Viết code cấp cao như iterator, closure, generic, `Option` mà không phải trả giá. Ví dụ:
+
+```rust
+let sum: i32 = v.iter().filter(|x| **x > 0).map(|x| x * 2).sum();
+```
+
+Sau khi tối ưu, đoạn này ra mã máy giống hệt vòng `for` viết tay, thường còn bỏ được bước kiểm tra biên mảng mà `v[i]` phải làm. Generic được **monomorphize**: mỗi kiểu cụ thể sinh một bản code riêng, gọi hàm trực tiếp, inline được, không qua vtable như interface của C#.
+
+**5. Tự quyết định dữ liệu nằm ở đâu.** Struct, mảng, tuple mặc định nằm trên stack hoặc liền nhau trong `Vec`, không bị bọc thành object trên heap. Chỉ khi viết `Box`, `Vec`, `String` mới cấp phát heap. Dữ liệu liền nhau thì CPU cache hoạt động tốt, đây chính là lý do Unity DOTS phải dùng struct và `NativeArray`.
+
+**6. Kiểu thông minh mà không tốn bộ nhớ.** Nhờ "niche optimization", `Option<&T>` và `Option<Box<T>>` có kích thước đúng bằng một con trỏ: `None` được mã hoá bằng giá trị 0 mà con trỏ hợp lệ không bao giờ có. Có an toàn của `Option` mà không thêm byte nào.
+
+**7. Song song không sợ.** `Send` và `Sync` là trait do compiler tự suy ra. Gửi `Rc` (không thread-safe) sang thread khác là lỗi biên dịch, không phải bug hiếm gặp mãi tới khi lên production mới lộ. Thư viện `rayon` cho phép đổi `.iter()` thành `.par_iter()` là chạy đa nhân, compiler đảm bảo không có data race.
+
+**8. Backend LLVM.** Rust dùng chung bộ tối ưu với Clang (C/C++), nên đạt cùng đẳng cấp về mã máy, cộng thêm thông tin mà C++ không có (aliasing, lifetime).
+
+| | C++ | C# (Unity) | Go | Rust |
+| --- | --- | --- | --- | --- |
+| Tốc độ | Rất cao | Trung bình - cao (Burst thì cao) | Cao | Rất cao |
+| Quản lý bộ nhớ | Thủ công | GC | GC | Ownership, lúc biên dịch |
+| Lỗi bộ nhớ | Có thể xảy ra | Hiếm | Hiếm | Không có trong code safe |
+| Data race | Có thể | Có thể | Có thể | Bị chặn lúc biên dịch |
+| Dừng vì GC | Không | Có | Có (ngắn) | Không |
+| `null` | Có | Có | Có (`nil`) | Không, dùng `Option` |
+| Quản lý gói | CMake, vcpkg... rời rạc | NuGet, UPM | `go mod` | Cargo, gọn nhất |
+
+**Cái giá phải trả** (nói thật cho công bằng):
+- **Khó học lúc đầu.** Vài tuần đầu bạn sẽ cãi nhau với borrow checker. Qua giai đoạn đó thì nó thành người review code miễn phí.
+- **Biên dịch chậm**, nhất là bản release và dự án nhiều generic.
+- **Hệ sinh thái game còn non** so với Unity/Unreal: chưa có editor trực quan đầy đủ, chưa có nhiều asset sẵn.
+
+Rust được bình chọn là ngôn ngữ **được yêu thích nhất** trong khảo sát Stack Overflow nhiều năm liền, liên tục từ 2016.
+
+## 2. Rust dùng vào việc gì
+
+Rust hợp với mọi chỗ cần **nhanh, ổn định, chạy lâu không lỗi**. Đây không còn là ngôn ngữ thử nghiệm, các công ty lớn đã đưa nó vào lõi sản phẩm.
+
+| Lĩnh vực | Ví dụ thực tế |
+| --- | --- |
+| Hệ điều hành | Linux kernel hỗ trợ viết driver bằng Rust từ bản 6.1. Windows có thành phần kernel viết bằng Rust. Android dùng Rust cho code hệ thống mới |
+| Trình duyệt | Firefox (engine CSS Stylo), Chromium dùng Rust cho các thư viện mới |
+| Hạ tầng mạng, cloud | Cloudflare (proxy Pingora), AWS Firecracker (máy ảo của Lambda), Discord chuyển dịch vụ đọc trạng thái từ Go sang Rust để hết giật vì GC |
+| Công cụ dòng lệnh | `ripgrep` (tìm kiếm), `fd`, `bat`, `eza`, `starship` |
+| Công cụ cho ngôn ngữ khác | `uv` và `ruff` (Python), Deno, Turbopack, SWC, Biome (JavaScript): nhanh hơn bản cũ hàng chục lần |
+| Ứng dụng desktop | Zed (code editor), Tauri (thay Electron, app nhẹ hơn nhiều) |
+| Game | Engine Bevy (ECS), Fyrox, Macroquad. Công cụ build, server game, xử lý asset |
+| WebAssembly | Chạy code Rust trong trình duyệt gần tốc độ native: Figma, xử lý ảnh, video, mô phỏng |
+| Nhúng, IoT | Vi điều khiển ESP32, STM32, RP2040 (`embassy`, `esp-hal`) |
+| Blockchain | Solana, Polkadot, Near: hợp đồng thông minh và node |
+| Backend web | `axum`, `actix-web`: API chịu tải cao, ít RAM |
+
+**Với dân Unity**, Rust có ích ở mấy chỗ:
+- Viết thư viện native (`cdylib`) cho phần tính toán nặng: pathfinding, sinh địa hình, nén dữ liệu, rồi gọi từ C# qua `DllImport` (xem mục 19).
+- Viết server game, matchmaking, công cụ xử lý asset hay build pipeline chạy nhanh và ít lỗi.
+- Hiểu Rust giúp viết Unity DOTS, Burst tốt hơn: cùng tư duy dữ liệu liền mạch, không cấp phát, rõ ai sở hữu dữ liệu nào.
+- Thử làm game với Bevy: ECS thuần, mã nguồn mở, viết hoàn toàn bằng code.
+
+**Không nên chọn Rust khi:** cần làm prototype thật nhanh để thử ý tưởng, làm game cần editor trực quan và kho asset (Unity vẫn nhanh hơn), hoặc script ngắn chạy một lần (Python gọn hơn).
+
+## 3. Cài đặt & Cargo
 
 Rust cài qua **rustup**, quản lý dự án và thư viện (crate) qua **Cargo**. Mọi thứ hằng ngày đều đi qua `cargo`.
 
@@ -65,7 +139,7 @@ strip = true        # bỏ symbol debug
 | `benches/` | Benchmark |
 | `Cargo.lock` | Phiên bản chính xác đã khoá. Commit nó cho cả binary lẫn library |
 
-## 2. Cú pháp cơ bản
+## 4. Cú pháp cơ bản
 
 ```rust
 fn main() {
@@ -109,7 +183,7 @@ let f = a.saturating_add(10);       // 255, kẹt ở biên
 
 Debug build sẽ `panic` khi tràn số nguyên, release build thì quay vòng. Muốn hành vi rõ ràng thì dùng `wrapping_*`, `checked_*`, `saturating_*`.
 
-## 3. Điều khiển luồng
+## 5. Điều khiển luồng
 
 Gần như mọi thứ trong Rust là **biểu thức** và trả về giá trị. Dòng cuối không có `;` là giá trị trả về.
 
@@ -159,7 +233,7 @@ let n @ 1..=5 = val else { return };  // @ gắn tên cho giá trị khớp
 
 `match` bắt buộc phủ hết mọi trường hợp. Thêm biến thể mới vào enum là compiler chỉ ra mọi chỗ cần sửa.
 
-## 4. Ownership, borrow, move
+## 6. Ownership, borrow, move
 
 Ba luật nền tảng:
 1. Mỗi giá trị có đúng **một chủ** (owner).
@@ -196,7 +270,7 @@ r3.push('b');
 
 Kiểu `Copy` (sao chép khi gán): số, `bool`, `char`, `&T`, tuple/mảng chứa toàn kiểu `Copy`. `String`, `Vec`, `Box` thì **move**.
 
-## 5. Lifetime
+## 7. Lifetime
 
 Lifetime là cách compiler chứng minh tham chiếu không sống lâu hơn dữ liệu nó trỏ tới. Phần lớn được suy ra tự động, chỉ phải ghi khi trả về tham chiếu mà compiler không biết nó lấy từ tham số nào.
 
@@ -227,7 +301,7 @@ let s: &'static str = "sống suốt chương trình";
 
 Gặp lỗi lifetime rối, cách thoát nhanh nhất thường là cho struct **sở hữu** dữ liệu (`String` thay `&str`) thay vì cố chú thích.
 
-## 6. Struct, enum, impl
+## 8. Struct, enum, impl
 
 ```rust
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -269,7 +343,7 @@ impl Shape {
 
 **Các derive hay dùng:** `Debug` (in `{:?}`), `Clone`, `Copy`, `PartialEq`/`Eq` (so sánh `==`), `PartialOrd`/`Ord` (sắp xếp), `Hash` (làm key `HashMap`), `Default`.
 
-## 7. Option & Result
+## 9. Option & Result
 
 Rust không có `null` và không có exception. Thiếu giá trị là `Option<T>`, có thể lỗi là `Result<T, E>`.
 
@@ -336,7 +410,7 @@ fn main() -> anyhow::Result<()> {
 }
 ```
 
-## 8. Trait & generic
+## 10. Trait & generic
 
 Trait giống interface: một tập hành vi kiểu nào cũng có thể cài đặt.
 
@@ -414,7 +488,7 @@ let p: Player = "Học".into();
 
 Luật orphan: chỉ được `impl Trait for Type` khi trait **hoặc** type thuộc crate của bạn. Muốn cài trait ngoài cho kiểu ngoài thì bọc trong newtype.
 
-## 9. Collection & chuỗi
+## 11. Collection & chuỗi
 
 ```rust
 // Vec
@@ -470,7 +544,7 @@ let num: i32 = "42".parse()?;
 
 Tiếng Việt có dấu mỗi ký tự 2-3 byte, nên đừng cắt chuỗi bằng chỉ số byte tuỳ tiện. Dùng `chars()` hoặc `char_indices()`.
 
-## 10. Iterator & closure
+## 12. Iterator & closure
 
 Iterator trong Rust là **lười**: không chạy gì cho tới khi gọi hàm kết thúc như `collect`, `sum`, `for`. Sau khi tối ưu, tốc độ ngang vòng `for` viết tay.
 
@@ -520,7 +594,7 @@ let boxed: Box<dyn Fn(i32) -> i32> = Box::new(|x| x + 1);
 | `FnMut` | Sửa | Nhiều lần, tuần tự |
 | `FnOnce` | Move ra ngoài | Một lần |
 
-## 11. Smart pointer & quản lý bộ nhớ
+## 13. Smart pointer & quản lý bộ nhớ
 
 | Kiểu | Dùng khi | Thread-safe |
 | --- | --- | --- |
@@ -549,7 +623,7 @@ println!("{:?} refs={}", shared.borrow(), Rc::strong_count(&shared));
 
 Công thức nhớ nhanh: 1 thread thì `Rc<RefCell<T>>`, nhiều thread thì `Arc<Mutex<T>>`.
 
-## 12. Module & visibility
+## 14. Module & visibility
 
 ```rust
 // src/lib.rs
@@ -582,7 +656,7 @@ members = ["core", "cli", "server"]
 resolver = "3"
 ```
 
-## 13. Test & tài liệu
+## 15. Test & tài liệu
 
 ```rust
 /// Cộng hai số. Comment `///` thành tài liệu, code bên trong là doc test.
@@ -617,7 +691,7 @@ mod tests {
 
 Integration test đặt ở `tests/*.rs`, mỗi file là một crate riêng, chỉ gọi được API `pub`.
 
-## 14. Concurrency
+## 16. Concurrency
 
 Compiler chặn data race ngay lúc biên dịch qua `Send` và `Sync`. Rust gọi đây là "fearless concurrency".
 
@@ -667,7 +741,7 @@ use std::sync::LazyLock;
 static CONFIG: LazyLock<String> = LazyLock::new(|| std::env::var("APP").unwrap_or_default());
 ```
 
-## 15. Async với Tokio
+## 17. Async với Tokio
 
 `async fn` trả về một `Future`, không chạy cho tới khi bị `.await`. Rust không kèm runtime, phổ biến nhất là **Tokio**.
 
@@ -703,7 +777,7 @@ async fn main() {
 - Giữ `std::sync::Mutex` qua `.await` làm future không `Send`. Thả khoá trước khi `.await`, hoặc dùng `tokio::sync::Mutex`.
 - `tokio::spawn` yêu cầu future là `'static`, nên thường phải `move` và clone `Arc` vào.
 
-## 16. Macro
+## 18. Macro
 
 ```rust
 // macro khai báo
@@ -731,7 +805,7 @@ if matches!(shape, Shape::Circle(_) | Shape::Empty) { }
 
 Procedural macro (`#[derive(Serialize)]`, `#[tokio::main]`) viết trong crate riêng có `proc-macro = true`, thường dùng `syn` và `quote`.
 
-## 17. Unsafe & FFI
+## 19. Unsafe & FFI
 
 `unsafe` không tắt borrow checker. Nó chỉ mở thêm 5 quyền: dereference con trỏ thô, gọi hàm `unsafe`, đọc/ghi `static mut`, cài trait `unsafe`, truy cập trường `union`.
 
@@ -764,7 +838,7 @@ crate-type = ["cdylib"]   # ra .dll / .so / .dylib
 
 Quy ước: bọc phần `unsafe` trong một hàm an toàn nhỏ, ghi comment `// SAFETY:` giải thích vì sao nó đúng. Chạy `cargo +nightly miri test` để bắt hành vi không xác định.
 
-## 18. Crate phổ biến
+## 20. Crate phổ biến
 
 | Mục đích | Crate |
 | --- | --- |
@@ -785,7 +859,7 @@ Quy ước: bọc phần `unsafe` trong một hàm an toàn nhỏ, ghi comment `
 | WebAssembly | `wasm-bindgen`, `wasm-pack` |
 | Benchmark | `criterion` |
 
-## 19. Lỗi compiler hay gặp
+## 21. Lỗi compiler hay gặp
 
 | Lỗi | Nghĩa | Cách sửa thường gặp |
 | --- | --- | --- |
@@ -799,7 +873,7 @@ Quy ước: bọc phần `unsafe` trong một hàm an toàn nhỏ, ghi comment `
 | `cannot move out of borrowed content` | Lấy giá trị ra khỏi tham chiếu | `.clone()`, `std::mem::take`, `Option::take` |
 | `future cannot be sent between threads` | Giữ thứ không `Send` qua `.await` | Thả khoá/`Rc` trước `.await`, đổi `Rc` sang `Arc` |
 
-## 20. Mẹo & thói quen tốt
+## 22. Mẹo & thói quen tốt
 
 - Viết xong chạy `cargo clippy`. Nó dạy cách viết Rust "đúng kiểu" tốt hơn mọi cuốn sách.
 - Đừng ngại `.clone()` khi mới học. Tối ưu sau, khi profiler chỉ ra chỗ chậm.
