@@ -4,3 +4,6 @@ dist/
 .env
 .DS_Store
 private/
+
+# Trạng thái build của skill design-taste-frontend
+.taste-skill/

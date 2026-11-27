@@ -24,6 +24,7 @@ Chạy `npm run build` sau mỗi thay đổi để kiểm tra schema nội dung 
 - `src/layouts/Post.astro`: trang bài viết. `wide` dùng cho cheatsheet: mục lục h2 dính bên trái, vạch đỏ chạy theo mục đang đọc.
 - `src/components/Seal.astro`: con dấu đỏ, có 3 kiểu `vertical` (mặc định, 高 trên 學), `square`, `single`. Favicon `public/favicon.svg` vẽ tay cùng kiểu dấu dọc.
 - `src/styles/global.css`: các token màu và cỡ chữ trên `:root`, chế độ tối qua `[data-theme='dark']`.
+- `.claude/skills/design-taste-frontend/`: skill thiết kế Taste Skill (MIT, github.com/Leonxlnx/taste-skill), chép nguyên thư mục `skills/taste-skill`, không sửa tay. Cập nhật bằng cách chép lại bản mới. Skill viết cho trang công ty; khi dùng cho blog này, quy ước bên dưới (màu qua biến CSS, con dấu, single input focus) được ưu tiên hơn luật của skill. Trạng thái build của nó nằm trong `.taste-skill/` (gitignore).
 
 README.md ghi cách viết bài, frontmatter và cách tạo album ảnh.
 
