@@ -5,6 +5,7 @@
 import { getCollection } from 'astro:content';
 import { getImage } from 'astro:assets';
 import { SITE, published, formatDate } from '../site';
+import Seal from '../components/Seal.astro';
 
 import posterSrc from '../assets/uploads/buc-man-sat.png';
 import gpusSrc from '../assets/uploads/gpu-toggle-gpus.png';
@@ -32,6 +33,7 @@ const otherSheets = sheets.filter((s) => !s.id.startsWith('unity-'));
 const ICONS: Record<string, { src: string; cls?: string; name: string }> = {
   unity: { src: '/assets/icons/unity.svg', cls: 'ic-ink', name: 'Unity' },
   blender: { src: '/assets/icons/blender.svg', name: 'Blender' },
+  rust: { src: '/assets/icons/rust.svg', cls: 'ic-ink', name: 'Rust' },
   git: { src: '/assets/icons/git.svg', name: 'Git' },
   firebase: { src: '/assets/icons/firebase.svg', cls: 'ic-tall', name: 'Firebase' },
   'sql-sqlite': { src: '/assets/icons/file-sqlite.svg', name: 'SQLite' },
@@ -102,6 +104,10 @@ const arrow =
       href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,400..600&family=Geist+Mono:wght@400..500&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&text=%E9%AB%98%E5%AD%B8&display=block"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/assets/system.css" />
     <link rel="stylesheet" href="/assets/ui/cards.css" />
     <link rel="stylesheet" href="/assets/motion/motion.css" />
@@ -131,7 +137,6 @@ const arrow =
     <script is:inline>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
     <link rel="modulepreload" href="/assets/moments/moments.js" />
     <link rel="modulepreload" href="/assets/moments/lib.js" />
-    <link rel="modulepreload" href="/assets/moments/pinned-chapters/moment.js" />
     <!-- CSS của trang: chỉ phần nằm trong hình và chiều cao panel của từng nhóm thẻ -->
     <style is:inline>
       .nav .menu-card .panel { --p-h: 200px; }
@@ -141,18 +146,19 @@ const arrow =
       #kien-thuc .rows__name { display: flex; align-items: center; gap: var(--s-3); min-height: 37px; }
       #kien-thuc .rows__name .ic { flex: none; width: 20px; height: 20px; object-fit: contain; }
       @media (max-width: 639px) { #kien-thuc .rows__name { min-height: 44px; } #kien-thuc .panel { --p-h: 360px; } }
-      /* điện thoại: pinned-chapters đứng yên và tự co chiều cao, giữ đúng hai màn hình như --hm: 2 */
-      /* Chủ site muốn bớt khoảng trống: section cao theo nội dung thay vì đúng một màn hình (luật của skill).
-         pinned-chapters khi đang chạy vẫn giữ hai màn hình của nó. */
-      html main > section.section:not([data-moment]),
-      html main > section.section[data-moment]:not(.is-live),
+      /* Chủ site muốn bớt khoảng trống: section cao theo nội dung thay vì đúng một màn hình (luật của skill). */
+      html main > section.section,
       html body > footer.footer.closing { height: auto; min-height: 0; --padt: 96px; --padb: 32px; }
       @media (max-width: 639px) {
-        html main > section.section:not([data-moment]),
-        html main > section.section[data-moment]:not(.is-live),
+        html main > section.section,
         html body > footer.footer.closing { --padt: 72px; --padb: 24px; }
       }
-      html body > footer.footer.closing .close__word { margin-top: var(--s-8); }
+      /* Lời mời cuối trang: con dấu lớn, câu mời và nút trên một hàng */
+      .close-row { align-items: center; justify-content: flex-start; gap: var(--s-6); }
+      .close-row > div { flex: 1 1 320px; }
+      .close-stamp { transform: rotate(-6deg); }
+      html body > footer.footer.closing .closing__cta { margin-bottom: var(--s-8); }
+      @media (max-width: 639px) { .close-stamp { height: 88px; width: auto; } }
       /* Hiện dần khi cuộn tới (src/lib/reveal.ts) */
       .rv-on [data-rv] { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--rv-i, 0) * 60ms); }
       .rv-on [data-rv].rv-in { opacity: 1; transform: none; }
@@ -164,8 +170,10 @@ const arrow =
       .xo-ground .xo-i { color: var(--p-ink); }
       @keyframes xo-drift { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(var(--xo-dy)) rotate(var(--xo-r)); } }
       @media (prefers-reduced-motion: reduce) { .xo-ground svg { animation: none; } }
-      #contact .close__word { overflow: visible; }
       #ghi-chep .frame > img { object-position: 50% 78%; }
+      /* Con dấu 高學 của site, đổi sang màu nhấn mệnh Thủy */
+      :root { --seal: var(--p-accent); --seal-cut: var(--p-bg); }
+      .nav__logo .seal { margin-right: var(--s-3); }
     </style>
   </head>
   <body>
@@ -180,14 +188,14 @@ const arrow =
       }
     </div>
     <!-- type: software (site-kind gaming)
-         deal: palette brand (mệnh Thủy, chủ site chọn, thay forest-pale-lime), hero film, nav nav-cards, close close-word, footer footer-dark, rhythm space (dealt again: media-band
+         deal: palette brand (mệnh Thủy, chủ site chọn, thay forest-pale-lime), hero film, nav nav-cards, close close-type with the site's seal (the owner found the big name empty), footer footer-dark, rhythm space (dealt again: media-band
          needs a landscape photograph other than the hero's, the site has none), buttons solid, mark dots, ground sky
-         moments: pinned-chapters on #gpu-toggle (iris-opens and line-carries-colour need a second ground, which the
-         space rhythm does not give; marquee-row's clipped rail failed row-lines and bleed-one-side) -->
+         moments: none now (the owner asked for less scroll: pinned-chapters held a whole screen); #gpu-toggle is a peek-list
+         logo: the site's own 高學 seal (src/components/Seal.astro) in the accent colour, not the dealt mark -->
     <header class="nav">
       <div class="wrap nav__bar">
         <a class="skip-link" href="#top">Bỏ qua menu</a>
-        <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>{SITE.name}</a>
+        <a class="nav__logo" href="#top"><Seal size={34} id="nav" />{SITE.name}</a>
         <nav class="nav__links" aria-label="Menu chính">
           <div class="nav__item"><a class="nav__link" href="/blog/">Bài viết</a></div>
           <div class="nav__item"><a class="nav__link" href="/kien-thuc/">Kiến thức</a></div>
@@ -273,31 +281,27 @@ const arrow =
         </div>
       </section>
 
-      <!-- pinned-chapters (moments.md): hai màn hình khi chạy, ba bước, mỗi bước một ảnh chụp app -->
-      <section class="section" id="gpu-toggle" style="--h: 2; --hm: 2" data-moment="pinned-chapters" aria-labelledby="gpu-h">
-        <div class="wrap mo-pc__grid">
-          <div class="mo-pc__text">
-            <h2 id="gpu-h">GPU Toggle Tools cho eGPU. <span class="muted">Cho những ai cắm eGPU xong game vẫn chạy iGPU.</span></h2>
-            <ol class="mo-pc__steps">
-              <li class="mo-pc__step">
-                <h3>Chọn GPU cho từng game</h3>
-                <p>Bấm Launch to test để biết game chạy card nào, khỏi đoán qua tiếng quạt.</p>
-                <figure class="mo-pc__visual"><img src={shots.apps.src} alt="Trang Apps / Games: danh sách game và GPU được chọn cho từng game" width="1000" height="602" loading="lazy" data-source="client" data-subject="GPU Toggle Tools, trang Apps" /></figure>
-              </li>
-              <li class="mo-pc__step">
-                <h3>Xem FPS trong game kẹt ở đâu</h3>
-                <p>OSD báo nghẽn ở GPU, CPU, PCIe hay VRAM. Đổ lỗi cho đúng linh kiện.</p>
-                <figure class="mo-pc__visual"><img src={shots.osd.src} alt="Trang OSD: FPS, GPU, VRAM, CPU, RAM và băng thông PCIe" width="1000" height="602" loading="lazy" data-source="client" data-subject="GPU Toggle Tools, trang OSD" /></figure>
-              </li>
-              <li class="mo-pc__step">
-                <h3>Sửa lỗi Code 43 của eGPU</h3>
-                <p>Gỡ sạch driver NVIDIA hoặc AMD rồi sửa từ nhẹ đến mạnh, trước khi nghĩ tới chuyện bán card.</p>
-                <figure class="mo-pc__visual"><img src={shots.repair.src} alt="Trang Repair: các bước gỡ driver và sửa lỗi Code 43" width="1000" height="602" loading="lazy" data-source="client" data-subject="GPU Toggle Tools, trang Repair" /></figure>
-              </li>
-            </ol>
+      <!-- peek-list (system.js): rê chuột, focus hoặc chạm vào một dòng thì ảnh bên phải đổi theo -->
+      <section class="section" id="gpu-toggle" aria-labelledby="gpu-h">
+        <div class="wrap">
+          <div class="section-head section-head--split" data-rv>
+            <div>
+              <h2 id="gpu-h">GPU Toggle Tools cho eGPU. <span class="muted">Cho những ai cắm eGPU xong game vẫn chạy iGPU.</span></h2>
+            </div>
             <a class="link" href="/projects/gpu-toggle-tools/">Xem trang GPU Toggle Tools</a>
           </div>
-          <div class="mo-pc__visuals frame"></div>
+          <div class="grid grid--top" data-peek>
+            <ul class="rows span-6">
+              <li data-peek-to="apps" tabindex="0" data-rv><span class="rows__name">Chọn GPU cho từng game</span><p>Bấm Launch to test để biết game chạy card nào, khỏi đoán qua tiếng quạt.</p></li>
+              <li data-peek-to="osd" tabindex="0" data-rv><span class="rows__name">Xem FPS trong game kẹt ở đâu</span><p>OSD báo nghẽn ở GPU, CPU, PCIe hay VRAM. Đổ lỗi cho đúng linh kiện.</p></li>
+              <li data-peek-to="repair" tabindex="0" data-rv><span class="rows__name">Sửa lỗi Code 43 của eGPU</span><p>Gỡ sạch driver NVIDIA hoặc AMD rồi sửa từ nhẹ đến mạnh, trước khi nghĩ tới chuyện bán card.</p></li>
+            </ul>
+            <div class="frame frame--photo span-6 start-7" data-rv style="--ratio: 60.2%">
+              <img class="frame__img" data-peek-for="apps" src={shots.apps.src} alt="Trang Apps / Games: danh sách game và GPU được chọn cho từng game" width="1000" height="602" loading="lazy" data-source="client" data-subject="GPU Toggle Tools" />
+              <img class="frame__img" data-peek-for="osd" src={shots.osd.src} alt="Trang OSD: FPS, GPU, VRAM, CPU, RAM và băng thông PCIe" width="1000" height="602" loading="lazy" data-source="client" data-subject="GPU Toggle Tools" hidden />
+              <img class="frame__img" data-peek-for="repair" src={shots.repair.src} alt="Trang Repair: các bước gỡ driver và sửa lỗi Code 43" width="1000" height="602" loading="lazy" data-source="client" data-subject="GPU Toggle Tools" hidden />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -368,20 +372,20 @@ const arrow =
 
     <footer class="footer closing footer--dark ground-inverse" id="contact" aria-labelledby="close-h">
       <div class="wrap">
-        <div class="closing__cta close--word">
-          <div class="section-head--split" data-rv>
+        <div class="closing__cta close--type">
+          <div class="section-head--split close-row" data-rv>
+            <Seal size={132} id="close" worn class="close-stamp" />
             <div>
               <h2 id="close-h">Xem CV của Cao Học</h2>
               <p class="t-lead">Unity, gameplay, tối ưu hiệu năng, và đọc được profiler lúc 2 giờ sáng.</p>
             </div>
             <a class="btn btn--primary" href="/cv/">Xem CV<Fragment set:html={arrow} /></a>
           </div>
-          <p class="close__word" data-rv aria-hidden="true">ncaohoc</p>
         </div>
         <div class="closing__links">
           <div class="grid">
             <div class="span-4 stack-4">
-              <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>{SITE.name}</a>
+              <a class="nav__logo" href="#top"><Seal size={34} id="foot" />{SITE.name}</a>
               <p class="footer__lede">Ghi chép của một Unity dev vẫn còn ngủ được.</p>
             </div>
             <div class="span-2 footer__col" data-rv>
