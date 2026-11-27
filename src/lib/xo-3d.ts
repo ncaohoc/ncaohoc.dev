@@ -2,7 +2,8 @@
 // Hình x và o dựng trong Blender (assets-src/xo/build_xo.py), cùng kiểu ống tròn, nạp từ /models/xo.glb;
 // không tải được file thì dùng hình xuyến và hai thanh hộp dựng sẵn bằng code. Mỗi khối xoay trong không gian, phóng to rồi
 // thu nhỏ tới biến mất theo vòng riêng; sương mù cùng màu nền làm khối ở xa mờ đi.
-// Màu lấy từ biến CSS --p-bg, --p-accent, --p-ink của trang.
+// Màu lấy từ biến CSS của trang: trang chủ --p-bg/--p-accent/--p-ink, các trang khác --paper/--seal/--ink,
+// và đổi theo khi bấm nút sáng/tối (data-theme trên <html>).
 // Giảm chuyển động: vẽ một khung đứng yên. Không có WebGL: trả về false để giữ lớp x o phẳng.
 import {
   AmbientLight,
@@ -38,18 +39,37 @@ interface Item {
   drift: number;
 }
 
-export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
+export interface XoOptions {
+  opacity?: number; // độ đục của khối
+  middleGap?: number; // tỉ lệ ô bị bỏ trống ở vùng giữa, nơi chữ nằm
+}
+
+export async function startXo3d(canvas: HTMLCanvasElement, opts: XoOptions = {}): Promise<boolean> {
+  const opacity = opts.opacity ?? 0.22;
+  const middleGap = opts.middleGap ?? 0.5;
   let renderer: WebGLRenderer;
   try {
     renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
   } catch {
     return false;
   }
-  const css = getComputedStyle(document.documentElement);
-  const token = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
-  const bg = new Color(token('--p-bg', '#06121f'));
-  const accent = new Color(token('--p-accent', '#5cc8ff'));
-  const ink = new Color(token('--p-ink', '#ffffff'));
+  const token = (names: string[], fallback: string) => {
+    const css = getComputedStyle(document.documentElement);
+    for (const n of names) {
+      const v = css.getPropertyValue(n).trim();
+      if (v) return v;
+    }
+    return fallback;
+  };
+  const bg = new Color();
+  const accent = new Color();
+  const ink = new Color();
+  const readColors = () => {
+    bg.set(token(['--p-bg', '--paper'], '#06121f'));
+    accent.set(token(['--p-accent', '--seal'], '#5cc8ff'));
+    ink.set(token(['--p-ink', '--ink'], '#ffffff'));
+  };
+  readColors();
 
   const scene = new Scene();
   scene.fog = new Fog(bg, 7, 18);
@@ -81,7 +101,7 @@ export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
   const cols = phone ? 3 : 8;
   const rows = phone ? 5 : 4;
   const mat = (c: Color) =>
-    new MeshStandardMaterial({ color: c, roughness: 0.4, metalness: 0.2, transparent: true, opacity: 0.22 });
+    new MeshStandardMaterial({ color: c, roughness: 0.4, metalness: 0.2, transparent: true, opacity });
 
   let seed = 1996;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -90,7 +110,7 @@ export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
     for (let c = 0; c < cols; c++) {
       // vùng giữa là chỗ chữ nằm: bỏ trống một nửa số ô ở đó để khối dồn ra hai bên
       const middle = phone ? c === 1 : c >= 2 && c <= cols - 3;
-      if (middle && rnd() < 0.5) continue;
+      if (middle && rnd() < middleGap) continue;
       const k = rnd();
       const item: Item = {
         nx: -1 + ((c + 0.5 + (rnd() - 0.5) * 0.8) / cols) * 2,
@@ -110,8 +130,20 @@ export async function startXo3d(canvas: HTMLCanvasElement): Promise<boolean> {
   }
   const geos = [torus, cross, torus, cross];
   const cols4 = [accent, accent, ink, ink];
-  const groups = buckets.map((items, i) => ({ mesh: new InstancedMesh(geos[i], mat(cols4[i]), Math.max(1, items.length)), items }));
+  const groups = buckets.map((items, i) => ({
+    mesh: new InstancedMesh(geos[i], mat(cols4[i].clone()), Math.max(1, items.length)),
+    items,
+  }));
   groups.forEach((g) => scene.add(g.mesh));
+
+  // Bấm nút sáng/tối: đọc lại màu, tô lại sương mù và khối
+  const recolor = () => {
+    readColors();
+    (scene.fog as Fog).color.copy(bg);
+    groups.forEach((g, i) => (g.mesh.material as MeshStandardMaterial).color.copy(i < 2 ? accent : ink));
+    renderer.render(scene, camera);
+  };
+  new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   const dummy = new Object3D();
   const m = new Matrix4();

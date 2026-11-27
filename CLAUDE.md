@@ -22,8 +22,10 @@ Chạy `npm run build` sau mỗi thay đổi để kiểm tra schema nội dung 
 - `src/layouts/Base.astro`: khung trang, header, menu. Mục "Sở thích" tự ẩn khi chưa có bài hoặc album nào đã đăng, "Giải trí" tự ẩn khi chưa có game nào.
 - `src/content/games/`: game chơi trên trình duyệt (mục "Giải trí"). Bản build WebGL để nguyên trong `public/games/<tên-file>/`, trường `play` trỏ tới `index.html` của nó. `src/components/GamePlayer.astro` chỉ tải game khi bấm "Bắt đầu chơi". Cloudflare giới hạn 25 MiB mỗi file, nên build Unity dùng nén Brotli kèm giải nén bằng JS (decompression fallback).
 - `src/layouts/Post.astro`: trang bài viết. `wide` dùng cho cheatsheet: mục lục h2 dính bên trái, vạch đỏ chạy theo mục đang đọc.
-- `src/components/Seal.astro`: con dấu đỏ, có 3 kiểu `vertical` (mặc định, 高 trên 學), `square`, `single`. Favicon `public/favicon.svg` vẽ tay cùng kiểu dấu dọc.
-- `src/styles/global.css`: các token màu và cỡ chữ trên `:root`, chế độ tối qua `[data-theme='dark']`.
+- `src/components/Seal.astro`: con dấu 高學 (màu `--seal`, xanh theo mệnh Thủy), có 3 kiểu `vertical` (mặc định, 高 trên 學), `square`, `single`. Favicon `public/favicon.svg` vẽ tay cùng kiểu dấu dọc, đổi màu theo sáng/tối của trình duyệt.
+- `src/styles/global.css`: các token màu và cỡ chữ trên `:root`, chế độ tối qua `[data-theme='dark']`. Bảng màu mệnh Thủy (xanh biển đêm, nhấn xanh nước). Tiêu đề, menu, nút dùng JetBrains Mono (`--mono`), chữ đọc dùng Be Vietnam Pro (`--font`).
+- `src/pages/index.astro`: trang chủ đứng riêng, không dùng `Base.astro`; CSS/JS lấy từ kit Taste Skill chép trong `public/assets/`.
+- `src/lib/xo-3d.ts`: nền x o 3D (three.js) cho mọi trang, mô hình `public/models/xo.glb` dựng từ `assets-src/xo/build_xo.py` (Blender, có file `.blend` gốc). Trang đọc dùng độ đục thấp hơn trang chủ.
 - `.claude/skills/design-taste-frontend/`: skill thiết kế Taste Skill (MIT, github.com/Leonxlnx/taste-skill), chép nguyên thư mục `skills/taste-skill`, không sửa tay. Cập nhật bằng cách chép lại bản mới. Skill viết cho trang công ty; khi dùng cho blog này, quy ước bên dưới (màu qua biến CSS, con dấu, single input focus) được ưu tiên hơn luật của skill. Trạng thái build của nó nằm trong `.taste-skill/` (gitignore).
 
 README.md ghi cách viết bài, frontmatter và cách tạo album ảnh.

@@ -64,7 +64,7 @@ const nav = NAV.filter(
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
     />
     <!-- Chỉ tải đúng 2 chữ của con dấu, không tải cả bộ font CJK -->
     <link
@@ -113,6 +113,7 @@ const nav = NAV.filter(
       </div>
     </header>
 
+    <canvas class="xo-3d" aria-hidden="true"></canvas>
     <main id="main">
       <slot />
     </main>
@@ -125,6 +126,17 @@ const nav = NAV.filter(
       </ul>
     </footer>
 
+    <script>
+      // Nền x o 3D (src/lib/xo-3d.ts), thưa và mờ hơn trang chủ vì đây là trang đọc.
+      // three.js chỉ tải khi trình duyệt rảnh, sau khi trang đã hiện.
+      const xoCanvas = document.querySelector<HTMLCanvasElement>('canvas.xo-3d');
+      const startXo = () =>
+        import('../lib/xo-3d')
+          .then(({ startXo3d }) => (xoCanvas ? startXo3d(xoCanvas, { opacity: 0.14, middleGap: 0.85 }) : false))
+          .then((ok) => ok && document.documentElement.classList.add('xo3d'));
+      if ('requestIdleCallback' in window) requestIdleCallback(startXo, { timeout: 2500 });
+      else setTimeout(startXo, 1000);
+    </script>
     <script is:inline>
       document.querySelector('.theme-toggle')?.addEventListener('click', () => {
         const root = document.documentElement;

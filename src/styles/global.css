@@ -1,17 +1,18 @@
 /* ---------- Tokens ---------- */
 :root {
-  --paper: #eef0f2;
-  --surface: #f7f8f9;
-  --ink: #17202b;
-  --muted: #5b6573;
-  --rule: #d3d8de;
-  --jade: #1d7563;
-  --seal: #b42a22;
-  --seal-cut: #f4f2ee;
-  --code-bg: #e4e8ec;
-  --jade-soft: rgb(29 117 99 / 0.1);
-  --seal-soft: rgb(180 42 34 / 0.09);
-  --glass: rgb(238 240 242 / 0.72);
+  /* Bảng màu mệnh Thủy: nền trắng ngả xanh nước, chữ xanh than, nhấn xanh dương */
+  --paper: #edf2f6;
+  --surface: #f7fafc;
+  --ink: #0f1d2b;
+  --muted: #526171;
+  --rule: #cdd8e2;
+  --jade: #12709c;
+  --seal: #1a6fa3;
+  --seal-cut: #f4f8fb;
+  --code-bg: #e0e9f0;
+  --jade-soft: rgb(18 112 156 / 0.1);
+  --seal-soft: rgb(26 111 163 / 0.09);
+  --glass: rgb(237 242 246 / 0.72);
   --shadow-1: 0 1px 2px rgb(23 32 43 / 0.05), 0 6px 18px -8px rgb(23 32 43 / 0.14);
   --shadow-2: 0 2px 6px rgb(23 32 43 / 0.06), 0 22px 44px -16px rgb(23 32 43 / 0.26);
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -37,17 +38,19 @@
 }
 
 :root[data-theme='dark'] {
-  --paper: #13181e;
-  --surface: #1a2027;
-  --ink: #e3e7eb;
-  --muted: #94a0ad;
-  --rule: #2b343e;
-  --jade: #5cc0a6;
-  --seal: #cf4236;
-  --code-bg: #1f262e;
-  --jade-soft: rgb(92 192 166 / 0.12);
-  --seal-soft: rgb(207 66 54 / 0.14);
-  --glass: rgb(19 24 30 / 0.72);
+  /* Tối: xanh biển đêm như trang chủ, nhấn xanh nước */
+  --paper: #06121f;
+  --surface: #0c2036;
+  --ink: #e6eef5;
+  --muted: #8d9aa8;
+  --rule: #1c2e42;
+  --jade: #6fd0f7;
+  --seal: #5cc8ff;
+  --seal-cut: #06121f;
+  --code-bg: #0e1d2e;
+  --jade-soft: rgb(111 208 247 / 0.12);
+  --seal-soft: rgb(92 200 255 / 0.14);
+  --glass: rgb(6 18 31 / 0.72);
   --shadow-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 18px -8px rgb(0 0 0 / 0.5);
   --shadow-2: 0 2px 6px rgb(0 0 0 / 0.3), 0 22px 44px -16px rgb(0 0 0 / 0.7);
   color-scheme: dark;
@@ -113,13 +116,20 @@ a:hover {
   color: var(--paper);
 }
 
+/* Kiểu IDE: tiêu đề, menu, nút và nhãn dùng font mono; chữ đọc dài vẫn là Be Vietnam Pro */
 h1,
 h2,
 h3,
 h4 {
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  font-family: var(--mono);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
   margin: 0;
+}
+.site-header,
+.btn,
+.site-footer {
+  font-family: var(--mono);
 }
 
 .wrap {
@@ -503,4 +513,20 @@ pre.astro-code {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* ---------- Nền x o 3D (src/lib/xo-3d.ts) ---------- */
+/* Nằm sau mọi nội dung (z-index âm, html không có nền nên nền của body vẽ dưới cùng) */
+.xo-3d {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease);
+}
+.xo3d .xo-3d {
+  opacity: 1;
 }

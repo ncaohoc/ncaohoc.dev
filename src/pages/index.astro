@@ -105,7 +105,7 @@ const arrow =
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,400..600&family=Geist+Mono:wght@400..500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Be+Vietnam+Pro:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link
@@ -119,20 +119,21 @@ const arrow =
     <link rel="stylesheet" href="/assets/layout/layout.css" />
     <link rel="stylesheet" href="/assets/icons/icon.css" />
     <link rel="stylesheet" href="/assets/diagrams/diagram.css" />
-    <!-- :root đúng như start.mjs brand in ra: màu mệnh Thủy chủ site chọn (nền xanh biển đêm, nhấn xanh nước), cặp font mona -->
+    <!-- :root theo start.mjs brand: màu mệnh Thủy chủ site chọn (nền xanh biển đêm, nhấn xanh nước); font đổi sang JetBrains Mono + Be Vietnam Pro theo ý chủ site -->
     <style is:inline>
       :root {
         --p-bg: #06121f; --p-surface: #0c2036; --p-ink: #ffffff; --p-muted: #838a92;
         --p-accent: #5cc8ff; --p-accent-ink: #06121f; --p-action: #5cc8ff; --p-action-ink: #06121f;
         --p-inv-bg: #ffffff; --p-inv-surface: #ebeced; --p-inv-ink: #06121f; --p-inv-muted: #58626c;
         --p-inv-accent: #06121f; --p-inv-accent-ink: #ffffff; --p-inv-action: #06121f; --p-inv-action-ink: #ffffff;
-        --font-display: "Mona Sans", system-ui, sans-serif;
-        --font-text: "Mona Sans", system-ui, sans-serif;
-        --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-        --display-weight: 500;
-        --display-tracking: -0.03em;
+        /* Kiểu IDE như cả site: tiêu đề, menu, nút dùng JetBrains Mono, chữ đọc dùng Be Vietnam Pro */
+        --font-display: "JetBrains Mono", ui-monospace, monospace;
+        --font-text: "Be Vietnam Pro", system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        --display-weight: 600;
+        --display-tracking: -0.035em;
         --display-tracking-xl: -0.04em;
-        --display-stretch: 104%;
+        --display-stretch: 100%;
         --ly-scale: 0.96;
       }
     </style>
@@ -184,6 +185,9 @@ const arrow =
       .xo3d .xo-3d { opacity: 1; }
       .xo3d .xo-ground { display: none; }
       #ghi-chep .frame > img { object-position: 50% 78%; }
+      /* Kiểu IDE: menu, nút, nhãn và ngày tháng dùng font mono như tiêu đề */
+      .hero--film h1 { font-size: clamp(34px, 4.1vw, 60px); }  /* mono rộng hơn: giữ h1 ở 3 dòng */
+      .nav, .btn, .link, .ly-play__label, .t-label, .footer__col, .footer__legal, .rows__value { font-family: var(--font-display); }
       /* Con dấu 高學 của site, đổi sang màu nhấn mệnh Thủy */
       :root { --seal: var(--p-accent); --seal-cut: var(--p-bg); }
       /* kit ép svg trong .nav__logo cao 24px; con dấu dọc cần cao hơn mới đọc được chữ */
