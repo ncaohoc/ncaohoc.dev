@@ -28,6 +28,8 @@ Bảo vệ sở chỉ huy và tiêu diệt 20 xe tăng địch mỗi màn, kiể
 
 Ở menu, bấm vào phe và xe muốn chơi, bấm lại vào xe đã chọn (hoặc nút **Bắt đầu**) để vào trận.
 
+Mới chơi lần đầu thì bấm nút **Hướng dẫn** (hoặc phím H) ở menu. Màn hướng dẫn dạy từng bước: lái xe, ngắm bắn, xoay camera, rồi lần lượt nhặt thử từng loại hộp tiếp tế để xem nó làm gì. Trong màn này xe bạn không bị phá hủy, phím N để bỏ qua một bước.
+
 ## Hai phe
 
 | Vai trò | NATO | Khối Warszawa |
