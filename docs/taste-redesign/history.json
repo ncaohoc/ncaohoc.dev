@@ -1,0 +1,35 @@
+{
+ "palettes": [
+  "forest-pale-lime"
+ ],
+ "types": [
+  "mona"
+ ],
+ "dealt": [
+  "mona",
+  "sora",
+  "archivo"
+ ],
+ "moments": [
+  {
+   "id": "iris-opens",
+   "at": "2026-11-27T19:26:30.812Z",
+   "seed": "bde07337"
+  },
+  {
+   "id": "line-carries-colour",
+   "at": "2026-11-27T19:28:03.021Z",
+   "seed": "2f4d2b70"
+  },
+  {
+   "id": "marquee-row",
+   "at": "2026-11-27T19:28:06.732Z",
+   "seed": "be0140c1"
+  },
+  {
+   "id": "pinned-chapters",
+   "at": "2026-11-27T19:46:07.250Z",
+   "seed": "f5bd4271"
+  }
+ ]
+}
