@@ -22,6 +22,7 @@ Tạo file Markdown trong đúng thư mục, tên file chính là đường dẫ
 | Kiến thức | `src/content/cheatsheets/` | `/kien-thuc/<tên-file>/` |
 | Dự án | `src/content/projects/` | `/projects/<tên-file>/` |
 | Sở thích | `src/content/hobbies/` | `/hobbies/<tên-file>/` |
+| Giải trí (game) | `src/content/games/` | `/giai-tri/<tên-file>/` |
 
 Phần đầu file (frontmatter):
 

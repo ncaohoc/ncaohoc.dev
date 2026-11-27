@@ -1,0 +1,40 @@
+---
+import { getCollection, render } from 'astro:content';
+import Post from '../../layouts/Post.astro';
+import GamePlayer from '../../components/GamePlayer.astro';
+import { published } from '../../site';
+
+export async function getStaticPaths() {
+  const games = published(await getCollection('games'));
+  return games.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+const aside = [
+  { label: 'Chơi bằng', value: d.controls },
+  ...(d.stack.length ? [{ label: 'Công nghệ', value: d.stack.join(', ') }] : []),
+  ...(d.repo ? [{ label: 'Mã nguồn', value: 'GitHub', href: d.repo }] : []),
+];
+const actions = [
+  { label: 'Chơi ngay', href: '#choi', primary: true },
+  ...(d.repo ? [{ label: 'Mã nguồn trên GitHub', href: d.repo }] : []),
+];
+---
+
+<Post
+  title={d.title}
+  description={d.description}
+  date={d.date}
+  updated={d.updated}
+  tags={d.tags}
+  ogImage={d.ogImage ?? d.cover}
+  aside={aside}
+  actions={actions}
+  back={{ href: '/giai-tri/', label: 'Giải trí' }}
+>
+  <GamePlayer slot="lead" src={d.play} title={d.title} aspect={d.aspect} controls={d.controls} cover={d.cover} />
+  <Content />
+</Post>

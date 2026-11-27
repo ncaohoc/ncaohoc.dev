@@ -15,6 +15,7 @@ export const NAV = [
   { href: '/kien-thuc/', label: 'Kiến thức' },
   { href: '/projects/', label: 'Dự án' },
   { href: '/hobbies/', label: 'Sở thích' },
+  { href: '/giai-tri/', label: 'Giải trí' },
   { href: '/cv/', label: 'CV' },
 ];
 

@@ -302,6 +302,82 @@ content:
         options:
           format: markdown
 
+  - name: games
+    label: Giải trí
+    type: collection
+    path: src/content/games
+    exclude: [.gitkeep]
+    filename:
+      template: "{primary}.md"
+      field: create
+    view:
+      fields: [title, date, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Tên game
+        type: string
+        required: true
+      - name: description
+        label: Mô tả ngắn
+        type: text
+        required: true
+      - name: date
+        label: Ngày đăng
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: updated
+        label: Ngày cập nhật
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: play
+        label: Đường dẫn bản build
+        description: Tới index.html của bản WebGL trong public/games/, ví dụ /games/buc-man-sat/index.html
+        type: string
+        required: true
+      - name: aspect
+        label: Tỉ lệ khung game
+        description: Ví dụ 16 / 9. Bỏ trống thì dùng 16 / 9
+        type: string
+      - name: controls
+        label: Chơi bằng
+        description: Ví dụ Bàn phím và chuột
+        type: string
+      - name: stack
+        label: Công nghệ
+        type: string
+        list: true
+      - name: repo
+        label: Link mã nguồn
+        type: string
+      - name: cover
+        label: Ảnh bìa (nền khung game trước khi bấm chơi)
+        type: image
+      - name: ogImage
+        label: Ảnh chia sẻ (Facebook, LinkedIn), nên 1200×627. Bỏ trống thì dùng ảnh bìa
+        type: image
+      - name: tags
+        label: Thẻ
+        type: string
+        list: true
+      - name: draft
+        label: Bản nháp (chưa hiện trên site)
+        type: boolean
+        default: false
+      - name: body
+        label: Nội dung
+        type: rich-text
+        options:
+          format: markdown
+
   - name: albums
     label: Album ảnh
     type: collection

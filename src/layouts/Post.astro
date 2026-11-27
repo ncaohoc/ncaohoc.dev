@@ -70,6 +70,8 @@ const toc = headings.filter((h) => h.depth === 2);
         </figure>
       )
     }
+    <!-- Nội dung rộng hết khung đặt trước bài, vd. khung chơi game -->
+    <slot name="lead" />
     {
       wide && toc.length > 2 ? (
         <div class="sheet-layout">

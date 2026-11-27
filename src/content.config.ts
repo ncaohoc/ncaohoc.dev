@@ -96,4 +96,21 @@ const albums = defineCollection({
   }),
 });
 
-export const collections = { blog, cheatsheets, projects, updates, hobbies, albums };
+// Giải trí: game chơi ngay trên trình duyệt. Bản build WebGL nằm trong public/games/<tên-file>/,
+// `play` là đường dẫn tới index.html của bản build đó.
+const games = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/games' }),
+  schema: ({ image }) =>
+    z.object({
+      ...base,
+      play: z.string(), // vd. /games/buc-man-sat/index.html
+      aspect: z.preprocess(empty, z.string().default('16 / 9')), // tỉ lệ khung game, theo cú pháp CSS aspect-ratio
+      controls: z.preprocess(empty, z.string().default('Bàn phím và chuột')), // chơi bằng gì
+      stack: list(),
+      repo: opt(z.string().url()),
+      cover: opt(image()), // ảnh nền của khung game trước khi bấm chơi
+      ogImage: opt(image()), // ảnh khi chia sẻ link, nên 1200×627; bỏ trống thì dùng ảnh bìa
+    }),
+});
+
+export const collections = { blog, cheatsheets, projects, updates, hobbies, albums, games };

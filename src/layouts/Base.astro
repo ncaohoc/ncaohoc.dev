@@ -21,10 +21,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 const path = Astro.url.pathname;
 const year = new Date().getFullYear();
 
-// Ẩn mục "Sở thích" khỏi menu khi chưa có bài hoặc album nào đã đăng
+// Ẩn mục "Sở thích" khỏi menu khi chưa có bài hoặc album nào đã đăng, "Giải trí" khi chưa có game nào
 const hobbyCount =
   published(await getCollection('hobbies')).length + published(await getCollection('albums')).length;
-const nav = NAV.filter((item) => item.href !== '/hobbies/' || hobbyCount > 0);
+const gameCount = published(await getCollection('games')).length;
+const nav = NAV.filter(
+  (item) => (item.href !== '/hobbies/' || hobbyCount > 0) && (item.href !== '/giai-tri/' || gameCount > 0),
+);
 ---
 
 <!doctype html>

@@ -19,7 +19,8 @@ Chạy `npm run build` sau mỗi thay đổi để kiểm tra schema nội dung 
 - `.pages.yml`: cấu hình Pages CMS (form thêm bài). Thêm hay đổi trường trong `src/content.config.ts` thì sửa cả file này. Schema coi `""`/`null` là ô trống vì Pages CMS ghi như vậy.
 - `src/content/updates/`: bản cập nhật của dự án, mỗi phiên bản một file, trường `project` là tên file dự án. Hiện dưới trang dự án qua `src/components/UpdateLog.astro`, phiên bản mới nhất lấy từ đây (`src/lib/updates.ts`). Dự án có phiên bản mới thì viết bài cập nhật, không sửa `version` trong file dự án.
 - `src/data/cv.ts`: nội dung trang CV. `src/pages/cv.astro` chỉ lo giao diện. Nút tải PDF chỉ hiện khi `cv.pdf` có giá trị. Bản PDF gốc có số điện thoại nằm trong `private/` (gitignore), không đưa lên repo.
-- `src/layouts/Base.astro`: khung trang, header, menu. Mục "Sở thích" tự ẩn khi chưa có bài hoặc album nào đã đăng.
+- `src/layouts/Base.astro`: khung trang, header, menu. Mục "Sở thích" tự ẩn khi chưa có bài hoặc album nào đã đăng, "Giải trí" tự ẩn khi chưa có game nào.
+- `src/content/games/`: game chơi trên trình duyệt (mục "Giải trí"). Bản build WebGL để nguyên trong `public/games/<tên-file>/`, trường `play` trỏ tới `index.html` của nó. `src/components/GamePlayer.astro` chỉ tải game khi bấm "Bắt đầu chơi". Cloudflare giới hạn 25 MiB mỗi file, nên build Unity dùng nén Brotli kèm giải nén bằng JS (decompression fallback).
 - `src/layouts/Post.astro`: trang bài viết. `wide` dùng cho cheatsheet: mục lục h2 dính bên trái, vạch đỏ chạy theo mục đang đọc.
 - `src/components/Seal.astro`: con dấu đỏ, có 3 kiểu `vertical` (mặc định, 高 trên 學), `square`, `single`. Favicon `public/favicon.svg` vẽ tay cùng kiểu dấu dọc.
 - `src/styles/global.css`: các token màu và cỡ chữ trên `:root`, chế độ tối qua `[data-theme='dark']`.
