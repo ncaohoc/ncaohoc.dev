@@ -173,7 +173,9 @@ const arrow =
       #ghi-chep .frame > img { object-position: 50% 78%; }
       /* Con dấu 高學 của site, đổi sang màu nhấn mệnh Thủy */
       :root { --seal: var(--p-accent); --seal-cut: var(--p-bg); }
-      .nav__logo .seal { margin-right: var(--s-3); }
+      /* kit ép svg trong .nav__logo cao 24px; con dấu dọc cần cao hơn mới đọc được chữ */
+      .nav__logo .seal { height: 44px; width: auto; margin-right: var(--s-3); }
+      @media (max-width: 639px) { .nav__logo .seal { height: 36px; } }
     </style>
   </head>
   <body>
