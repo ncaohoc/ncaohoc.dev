@@ -23,7 +23,6 @@ const shots = {
   osd: await webp(osdSrc, 1000),
   repair: await webp(repairSrc, 1000),
 };
-const navShots = { gpus: await webp(gpusSrc, 640), poster: await webp(posterSrc, 640), egpu: await webp(egpuSrc, 640) };
 const egpu = await webp(egpuSrc, 1100);
 
 // Kiến thức: gom các trang Unity vào một thẻ, mỗi chủ đề khác một thẻ có icon thật của công cụ
@@ -204,6 +203,8 @@ const arrow =
       .xo3d .xo-3d { opacity: 1; }
       .xo3d .xo-ground { display: none; }
       #ghi-chep .frame > img { object-position: 50% 78%; }
+      /* luôn chừa chỗ thanh cuộn như các trang khác, để header không xê dịch khi chuyển trang */
+      html { scrollbar-gutter: stable; }
       /* Nút sáng/tối, cùng kiểu với các trang khác */
       .theme-toggle { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; transition: background 0.2s, transform 0.3s var(--ease); }
       .theme-toggle:hover { background: var(--p-surface); transform: rotate(15deg); }
@@ -234,7 +235,7 @@ const arrow =
       }
     </div>
     <!-- type: software (site-kind gaming)
-         deal: palette brand (mệnh Thủy, chủ site chọn, thay forest-pale-lime), hero film, nav nav-cards, close close-type with the site's seal (the owner found the big name empty), footer footer-dark, rhythm space (dealt again: media-band
+         deal (nav-cards panel removed so the header matches the other pages): palette brand (mệnh Thủy, chủ site chọn, thay forest-pale-lime), hero film, nav nav-cards, close close-type with the site's seal (the owner found the big name empty), footer footer-dark, rhythm space (dealt again: media-band
          needs a landscape photograph other than the hero's, the site has none), buttons solid, mark dots, ground sky
          moments: none now (the owner asked for less scroll: pinned-chapters held a whole screen); #gpu-toggle is a peek-list
          logo: the site's own 高學 seal (src/components/Seal.astro) in the accent colour, not the dealt mark -->
@@ -245,33 +246,7 @@ const arrow =
         <nav class="nav__links" aria-label="Menu chính">
           <div class="nav__item"><a class="nav__link" href="/blog/">Bài viết</a></div>
           <div class="nav__item"><a class="nav__link" href="/kien-thuc/">Kiến thức</a></div>
-          <div class="nav__item">
-            <a class="nav__link" href="/projects/"
-              >Dự án <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"
-                ><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                ></path></svg
-              ></a
-            >
-            <div class="nav__menu">
-              <div class="wrap grid">
-                <a class="menu-card span-4" href="/projects/gpu-toggle-tools/">
-                  <div class="panel"><img class="frame__img" src={navShots.gpus.src} alt="Trang GPUs của GPU Toggle Tools" loading="lazy" /></div>
-                  <span class="t-card">GPU Toggle Tools</span>
-                  <span class="t-small muted">Bật tắt GPU, đo PCIe, sửa lỗi Code 43</span>
-                </a>
-                <a class="menu-card span-4" href="/giai-tri/buc-man-sat/">
-                  <div class="panel"><img class="frame__img" src={navShots.poster.src} alt="Xe tăng giữa các bức tường gạch trong Bức Màn Sắt" loading="lazy" /></div>
-                  <span class="t-card">Bức Màn Sắt</span>
-                  <span class="t-small muted">Game xe tăng 2.5D chơi trên trình duyệt</span>
-                </a>
-                <a class="menu-card span-4" href="/hobbies/hop-egpu-chong-bui/">
-                  <div class="panel"><img class="frame__img" src={navShots.egpu.src} alt="Hộp mica chứa eGPU đặt dưới kệ ROG Ally" loading="lazy" /></div>
-                  <span class="t-card">Hộp chống bụi cho eGPU</span>
-                  <span class="t-small muted">Card có nhà riêng, quạt tự chỉnh theo nhiệt độ</span>
-                </a>
-              </div>
-            </div>
-          </div>
+          <div class="nav__item"><a class="nav__link" href="/projects/">Dự án</a></div>
           <div class="nav__item"><a class="nav__link" href="/giai-tri/">Giải trí</a></div>
           <div class="nav__item"><a class="nav__link" href="/hobbies/">Sở thích</a></div>
         </nav>

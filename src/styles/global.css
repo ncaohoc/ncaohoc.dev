@@ -66,12 +66,18 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   scroll-padding-top: calc(var(--header-h) + 1rem);
+  /* luôn chừa chỗ thanh cuộn, để header không xê dịch khi chuyển giữa trang dài và trang ngắn */
+  scrollbar-gutter: stable;
 }
-/* màn hẹp: header hai hàng (logo và nút ở trên, menu ở dưới) */
-@media (max-width: 860px) {
+/* điện thoại: header một hàng cao 56px như trang chủ, menu nằm trong sheet */
+@media (max-width: 640px) {
   :root {
-    --header-h: 7.25rem;
+    --header-h: 3.5rem;
   }
+}
+/* sheet menu đang mở: trang bên dưới không cuộn */
+body.menu-open {
+  overflow: hidden;
 }
 
 /* Chuyển trang mượt giữa các trang (trình duyệt hỗ trợ cross-document view transition) */
