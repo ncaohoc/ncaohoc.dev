@@ -12,11 +12,14 @@ interface Props {
   cover?: ImageMetadata;
 }
 const { src, title, aspect = '16 / 9', controls, cover } = Astro.props;
+// Tỉ lệ dạng số để tính bề rộng khung theo chiều cao màn hình
+const [aw, ah = 1] = aspect.split('/').map((n) => parseFloat(n));
+const ratio = aw / ah || 16 / 9;
 ---
 
-<section class="player" id="choi" aria-label={`Chơi ${title}`} data-player data-src={src} data-title={title}>
+<section class="player" id="choi" style={`--ratio: ${ratio}`} aria-label={`Chơi ${title}`} data-player data-src={src} data-title={title}>
   <div class="frame" style={`aspect-ratio: ${aspect}`} data-frame>
-    {cover && <Image class="poster" src={cover} alt="" widths={[800, 1400]} sizes="(max-width: 1100px) 100vw, 1060px" format="webp" />}
+    {cover && <Image class="poster" src={cover} alt="" widths={[800, 1400]} sizes="100vw" format="webp" />}
     <div class="start" data-start>
       <button class="btn" type="button" data-play>Bắt đầu chơi</button>
       {controls && <p>{controls}</p>}
@@ -51,6 +54,8 @@ const { src, title, aspect = '16 / 9', controls, cover } = Astro.props;
       full.disabled = false;
       iframe.addEventListener('load', () => iframe?.focus());
       iframe.focus();
+      // Cuộn để cả khung game nằm gọn trong màn hình
+      player.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     full.addEventListener('click', () => {
@@ -67,8 +72,14 @@ const { src, title, aspect = '16 / 9', controls, cover } = Astro.props;
 </script>
 
 <style>
+  /* Khung rộng hơn cột bài viết: lớn nhất có thể mà vẫn vừa chiều cao cửa sổ
+     (trừ thanh menu và thanh nút bên dưới), không bao giờ hẹp hơn cột.
+     Trừ thêm 1.25rem cho thanh cuộn dọc để không sinh cuộn ngang. */
   .player {
-    margin: 0 0 2.5rem;
+    --w: max(100%, min(calc(100vw - 2 * var(--gutter) - 1.25rem), calc((100svh - var(--header-h) - 5rem) * var(--ratio))));
+    width: var(--w);
+    margin: 0 calc((100% - var(--w)) / 2) 2.5rem;
+    scroll-margin-top: calc(var(--header-h) + 0.5rem);
   }
   .frame {
     position: relative;
