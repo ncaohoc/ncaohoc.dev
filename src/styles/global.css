@@ -67,9 +67,10 @@ html {
   -webkit-tap-highlight-color: transparent;
   scroll-padding-top: calc(var(--header-h) + 1rem);
 }
-@media (max-width: 640px) {
+/* màn hẹp: header hai hàng (logo và nút ở trên, menu ở dưới) */
+@media (max-width: 860px) {
   :root {
-    --header-h: 6.5rem;
+    --header-h: 7.25rem;
   }
 }
 

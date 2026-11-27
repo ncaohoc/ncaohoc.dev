@@ -10,13 +10,13 @@ export const SITE = {
   lang: 'vi',
 };
 
+// Menu chính, cùng thứ tự với header trang chủ. CV là nút "Xem CV" riêng ở góc phải.
 export const NAV = [
-  { href: '/blog/', label: 'Blog' },
+  { href: '/blog/', label: 'Bài viết' },
   { href: '/kien-thuc/', label: 'Kiến thức' },
   { href: '/projects/', label: 'Dự án' },
-  { href: '/hobbies/', label: 'Sở thích' },
   { href: '/giai-tri/', label: 'Giải trí' },
-  { href: '/cv/', label: 'CV' },
+  { href: '/hobbies/', label: 'Sở thích' },
 ];
 
 export function formatDate(d: Date) {

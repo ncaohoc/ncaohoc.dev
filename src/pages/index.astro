@@ -97,7 +97,7 @@ const arrow =
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(share.src, Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
     <meta name="theme-color" content="#06121f" />
     <meta name="site-kind" content="gaming" />
@@ -136,7 +136,26 @@ const arrow =
         --display-stretch: 100%;
         --ly-scale: 0.96;
       }
+      /* Chế độ sáng, cùng tông với các trang khác (global.css): nền trắng ngả xanh, nhấn xanh đậm.
+         Ô chữ ở hero và footer dùng nền đảo (tối) cho nổi trên nền sáng. */
+      :root[data-theme="light"] {
+        --p-bg: #edf2f6; --p-surface: #f7fafc; --p-ink: #0f1d2b; --p-muted: #526171;
+        --p-accent: #1a6fa3; --p-accent-ink: #ffffff; --p-action: #1a6fa3; --p-action-ink: #ffffff;
+        --p-inv-bg: #0b1a2a; --p-inv-surface: #11263b; --p-inv-ink: #ffffff; --p-inv-muted: #9aa8b6;
+        --p-inv-accent: #5cc8ff; --p-inv-accent-ink: #06121f; --p-inv-action: #5cc8ff; --p-inv-action-ink: #06121f;
+      }
     </style>
+    <script is:inline>
+      // Sáng/tối như các trang khác: lựa chọn đã lưu, không có thì theo hệ điều hành.
+      // data-tone để kit (system.css) biết nền trang đang sáng hay tối.
+      (() => {
+        let t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+        document.documentElement.dataset.tone = t;
+      })();
+    </script>
     <script is:inline>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
     <script is:inline src="/assets/backgrounds/backgrounds.js"></script>
     <script is:inline>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
@@ -185,6 +204,13 @@ const arrow =
       .xo3d .xo-3d { opacity: 1; }
       .xo3d .xo-ground { display: none; }
       #ghi-chep .frame > img { object-position: 50% 78%; }
+      /* Nút sáng/tối, cùng kiểu với các trang khác */
+      .theme-toggle { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; transition: background 0.2s, transform 0.3s var(--ease); }
+      .theme-toggle:hover { background: var(--p-surface); transform: rotate(15deg); }
+      .theme-toggle path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      [data-theme="dark"] .theme-toggle .sun, [data-theme="light"] .theme-toggle .moon { display: none; }
+      /* logo đen (Unity, Rust) chỉ đảo sang trắng khi nền tối */
+      html[data-theme="light"] .ic-dark .ic-ink { filter: none; }
       /* Kiểu IDE: menu, nút, nhãn và ngày tháng dùng font mono như tiêu đề */
       .hero--film h1 { font-size: clamp(34px, 4.1vw, 60px); }  /* mono rộng hơn: giữ h1 ở 3 dòng */
       .nav, .btn, .link, .ly-play__label, .t-label, .footer__col, .footer__legal, .rows__value { font-family: var(--font-display); }
@@ -250,6 +276,12 @@ const arrow =
           <div class="nav__item"><a class="nav__link" href="/hobbies/">Sở thích</a></div>
         </nav>
         <div class="nav__actions">
+          <button class="theme-toggle" type="button" aria-label="Đổi giao diện sáng/tối">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path class="sun" d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66 1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14-1.41-1.41M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path>
+              <path class="moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"></path>
+            </svg>
+          </button>
           <a class="btn btn--primary" href="/cv/">Xem CV</a>
         </div>
         <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Mở menu">
@@ -443,6 +475,14 @@ const arrow =
       import { lockWhileClass } from '../lib/lock-under';
       import { revealOnScroll } from '../lib/reveal';
       revealOnScroll();
+      document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        root.dataset.tone = next;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#06121f' : '#edf2f6');
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
       // three.js nặng, nên chỉ tải khi trình duyệt rảnh, sau khi trang đã hiện
       const xoCanvas = document.querySelector<HTMLCanvasElement>('canvas.xo-3d');
       const startXo = () =>
