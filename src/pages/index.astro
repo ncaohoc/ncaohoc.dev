@@ -48,6 +48,28 @@ const writing = [
   .slice(0, 3);
 const hobby = published(await getCollection('hobbies')).find((h) => h.id === 'hop-egpu-chong-bui');
 
+// Nền x o: 34 ký hiệu rải khắp trang, cỡ từ nhỏ đến to, càng to càng mờ và nhoè
+let seed = 1996;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const xo = Array.from({ length: 34 }, (_, i) => {
+  const k = rnd();
+  const size = Math.round(14 + k * k * 170);
+  return {
+    kind: i % 2 ? 'o' : 'x',
+    accent: rnd() < 0.55,
+    size,
+    top: +(1 + rnd() * 97).toFixed(2),
+    left: +(-4 + rnd() * 100).toFixed(2),
+    op: +(0.16 - k * 0.11).toFixed(3),
+    sw: +(2.4 - k * 1.2).toFixed(2),
+    blur: +(k * k * 3).toFixed(1),
+    t: Math.round(12 + rnd() * 14),
+    dy: Math.round(-10 - rnd() * 18),
+    r: Math.round(-12 + rnd() * 24),
+    delay: Math.round(rnd() * 20),
+  };
+});
+
 const title = `${SITE.name}: Unity game developer ở Sài Gòn`;
 const description =
   'Blog của Nguyễn Lê Cao Học: game làm bằng Unity, GPU Toggle Tools cho eGPU và ghi chú kỹ thuật tra nhanh.';
@@ -118,14 +140,45 @@ const arrow =
       #kien-thuc .rows > li { padding-block: 0; }
       #kien-thuc .rows__name { display: flex; align-items: center; gap: var(--s-3); min-height: 37px; }
       #kien-thuc .rows__name .ic { flex: none; width: 20px; height: 20px; object-fit: contain; }
-      @media (max-width: 639px) { #kien-thuc .rows__name { min-height: 44px; } #kien-thuc .panel { --p-h: 560px; } }
+      @media (max-width: 639px) { #kien-thuc .rows__name { min-height: 44px; } #kien-thuc .panel { --p-h: 360px; } }
       /* điện thoại: pinned-chapters đứng yên và tự co chiều cao, giữ đúng hai màn hình như --hm: 2 */
-      @media (max-width: 639px) { main > #gpu-toggle[data-moment]:not(.is-live) { min-height: 200lvh; } #gpu-toggle:not(.is-live) .mo-pc__visual > img { max-height: 34svh; } }
+      /* Chủ site muốn bớt khoảng trống: section cao theo nội dung thay vì đúng một màn hình (luật của skill).
+         pinned-chapters khi đang chạy vẫn giữ hai màn hình của nó. */
+      html main > section.section:not([data-moment]),
+      html main > section.section[data-moment]:not(.is-live),
+      html body > footer.footer.closing { height: auto; min-height: 0; --padt: 96px; --padb: 32px; }
+      @media (max-width: 639px) {
+        html main > section.section:not([data-moment]),
+        html main > section.section[data-moment]:not(.is-live),
+        html body > footer.footer.closing { --padt: 72px; --padb: 24px; }
+      }
+      html body > footer.footer.closing .close__word { margin-top: var(--s-8); }
+      /* Hiện dần khi cuộn tới (src/lib/reveal.ts) */
+      .rv-on [data-rv] { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--rv-i, 0) * 60ms); }
+      .rv-on [data-rv].rv-in { opacity: 1; transform: none; }
+      /* Nền x o mờ, nhiều cỡ, trôi chậm */
+      body { position: relative; }
+      .xo-ground { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+      .xo-ground svg { position: absolute; fill: none; stroke: currentColor; stroke-linecap: round; animation: xo-drift var(--xo-t) ease-in-out infinite alternate; }
+      .xo-ground .xo-a { color: var(--p-accent); }
+      .xo-ground .xo-i { color: var(--p-ink); }
+      @keyframes xo-drift { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(var(--xo-dy)) rotate(var(--xo-r)); } }
+      @media (prefers-reduced-motion: reduce) { .xo-ground svg { animation: none; } }
       #contact .close__word { overflow: visible; }
       #ghi-chep .frame > img { object-position: 50% 78%; }
     </style>
   </head>
   <body>
+    <div class="xo-ground" aria-hidden="true">
+      {
+        xo.map((g) => (
+          <svg class={g.accent ? 'xo-a' : 'xo-i'} viewBox="0 0 24 24" width={g.size} height={g.size}
+            style={`top:${g.top}%;left:${g.left}%;opacity:${g.op};stroke-width:${g.sw};filter:blur(${g.blur}px);--xo-t:${g.t}s;--xo-dy:${g.dy}px;--xo-r:${g.r}deg;animation-delay:-${g.delay}s`}>
+            {g.kind === 'x' ? <path d="M5 5 19 19M19 5 5 19" /> : <circle cx="12" cy="12" r="8" />}
+          </svg>
+        ))
+      }
+    </div>
     <!-- type: software (site-kind gaming)
          deal: palette brand (mệnh Thủy, chủ site chọn, thay forest-pale-lime), hero film, nav nav-cards, close close-word, footer footer-dark, rhythm space (dealt again: media-band
          needs a landscape photograph other than the hero's, the site has none), buttons solid, mark dots, ground sky
@@ -248,22 +301,22 @@ const arrow =
         </div>
       </section>
 
-      <section class="section ic-dark" id="kien-thuc" style="--hm: 2" aria-labelledby="kt-h">
+      <section class="section ic-dark" id="kien-thuc" aria-labelledby="kt-h">
         <div class="wrap">
-          <div class="section-head section-head--split">
+          <div class="section-head section-head--split" data-rv>
             <div>
               <h2 id="kt-h">Ghi chú kỹ thuật tra nhanh. <span class="muted">{sheets.length} trang, đọc trước khi hỏi AI.</span></h2>
             </div>
             <a class="link" href="/kien-thuc/">Xem tất cả ghi chú</a>
           </div>
           <div class="grid grid--top">
-            <div class="panel span-6"><div class="dg" data-diagram><script type="application/json">{"layout": "hub", "alt": "Các ghi chú toả ra từ một mục: Unity với DOTS và shader, cùng Blender, Git, Firebase, SQLite và Web3.", "center": {"label": "Ghi chú", "icon": "ui:book-open"}, "spokes": [{"label": "Unity", "icon": "unity", "children": [{"label": "DOTS", "icon": "ui:file-code"}, {"label": "Shader", "icon": "ui:file-code"}]}, {"label": "Blender", "icon": "blender"}, {"label": "Git", "icon": "git"}, {"label": "Firebase", "icon": "firebase"}, {"label": "SQLite", "icon": "file:sqlite"}, {"label": "Web3", "icon": "ethereum"}]}</script></div></div>
+            <div class="panel span-6" data-rv><div class="dg" data-diagram><script type="application/json">{"layout": "hub", "alt": "Các ghi chú toả ra từ một mục: Unity với DOTS và shader, cùng Blender, Git, Firebase, SQLite và Web3.", "center": {"label": "Ghi chú", "icon": "ui:book-open"}, "spokes": [{"label": "Unity", "icon": "unity", "children": [{"label": "DOTS", "icon": "ui:file-code"}, {"label": "Shader", "icon": "ui:file-code"}]}, {"label": "Blender", "icon": "blender"}, {"label": "Git", "icon": "git"}, {"label": "Firebase", "icon": "firebase"}, {"label": "SQLite", "icon": "file:sqlite"}, {"label": "Web3", "icon": "ethereum"}]}</script></div></div>
             <ul class="rows span-6 start-7">
               {
                 [...unitySheets, ...otherSheets].map((s) => {
                   const ic = s.id.startsWith('unity-') ? ICONS.unity : ICONS[s.id];
                   return (
-                    <li>
+                    <li data-rv>
                       <a class="rows__name" href={`/kien-thuc/${s.id}/`}>
                         {ic && <img class={`ic ic-24 ${ic.cls ?? ''}`} src={ic.src} alt="" width="24" height="24" />}
                         {s.data.title}
@@ -279,7 +332,7 @@ const arrow =
 
       <section class="section" id="ghi-chep" aria-labelledby="gc-h">
         <div class="wrap">
-          <div class="section-head">
+          <div class="section-head" data-rv>
             <h2 id="gc-h">{writing.length} bài viết mới nhất</h2>
             <p>Devlog, chuyện nghề và đồ tự chế chưa cháy lần nào.</p>
           </div>
@@ -287,7 +340,7 @@ const arrow =
             <ul class="rows span-6">
               {
                 writing.map((w) => (
-                  <li>
+                  <li data-rv>
                     <a class="rows__name link" href={w.href}>{w.title}</a>
                     <span class="rows__value">{formatDate(w.date)}</span>
                   </li>
@@ -296,7 +349,7 @@ const arrow =
             </ul>
             {
               hobby && (
-                <a class="frame frame--photo span-6 start-7" href={`/hobbies/${hobby.id}/`} style="--ratio: 75%">
+                <a class="frame frame--photo span-6 start-7" data-rv href={`/hobbies/${hobby.id}/`} style="--ratio: 75%">
                   <img
                     class="frame__img"
                     src={egpu.src}
@@ -316,14 +369,14 @@ const arrow =
     <footer class="footer closing footer--dark ground-inverse" id="contact" aria-labelledby="close-h">
       <div class="wrap">
         <div class="closing__cta close--word">
-          <div class="section-head--split">
+          <div class="section-head--split" data-rv>
             <div>
               <h2 id="close-h">Xem CV của Cao Học</h2>
               <p class="t-lead">Unity, gameplay, tối ưu hiệu năng, và đọc được profiler lúc 2 giờ sáng.</p>
             </div>
             <a class="btn btn--primary" href="/cv/">Xem CV<Fragment set:html={arrow} /></a>
           </div>
-          <p class="close__word" aria-hidden="true">ncaohoc</p>
+          <p class="close__word" data-rv aria-hidden="true">ncaohoc</p>
         </div>
         <div class="closing__links">
           <div class="grid">
@@ -331,19 +384,19 @@ const arrow =
               <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>{SITE.name}</a>
               <p class="footer__lede">Ghi chép của một Unity dev vẫn còn ngủ được.</p>
             </div>
-            <div class="span-2 footer__col">
+            <div class="span-2 footer__col" data-rv>
               <h3>Viết</h3>
               <ul><li><a href="/blog/">Bài viết</a></li><li><a href="/kien-thuc/">Kiến thức</a></li></ul>
             </div>
-            <div class="span-2 footer__col">
+            <div class="span-2 footer__col" data-rv>
               <h3>Làm</h3>
               <ul><li><a href="/projects/">Dự án</a></li><li><a href="/giai-tri/">Giải trí</a></li></ul>
             </div>
-            <div class="span-2 footer__col">
+            <div class="span-2 footer__col" data-rv>
               <h3>Khác</h3>
               <ul><li><a href="/hobbies/">Sở thích</a></li><li><a href="/cv/">CV</a></li></ul>
             </div>
-            <div class="span-2 footer__col">
+            <div class="span-2 footer__col" data-rv>
               <h3>Theo dõi</h3>
               <ul><li><a href="/rss.xml">RSS</a></li><li><a href="https://github.com/ncaohoc">GitHub</a></li></ul>
             </div>
@@ -364,6 +417,8 @@ const arrow =
     <script>
       // Menu điện thoại của kit mở bằng class .is-open: khoá phần bên dưới bằng helper dùng chung
       import { lockWhileClass } from '../lib/lock-under';
+      import { revealOnScroll } from '../lib/reveal';
+      revealOnScroll();
       const nav = document.querySelector('header.nav');
       if (nav) lockWhileClass(nav, 'is-open');
     </script>
