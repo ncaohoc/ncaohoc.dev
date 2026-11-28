@@ -70,7 +70,7 @@ html {
   scrollbar-gutter: stable;
 }
 /* điện thoại: header một hàng cao 56px như trang chủ, menu nằm trong sheet */
-@media (max-width: 640px) {
+@media (max-width: 639px) {
   :root {
     --header-h: 3.5rem;
   }

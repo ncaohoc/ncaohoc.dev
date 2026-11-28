@@ -348,9 +348,26 @@ const nav = NAV.filter(
   .site-footer a {
     color: var(--muted);
   }
-  @media (max-width: 1023px) {
+  /* lề 48px dưới 1024px, cùng mốc với kit (system.css: lề 48px từ 640px, 80px từ 1024px; khổ lẻ như 1023,5px vẫn là tablet) */
+  @media (min-width: 640px) and (max-width: 1023.98px) {
     .site-header {
       --hgut: 48px;
+    }
+  }
+  /* laptop nhỏ (1024-1279px): menu sát lại, đúng như kit trên trang chủ (system.css), để chuyển trang không nhảy */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .header-inner {
+      gap: 1rem 32px;
+    }
+    nav ul {
+      gap: 0;
+    }
+    nav a {
+      padding: 0 8px;
+    }
+    nav a::after {
+      left: 8px;
+      right: 8px;
     }
   }
   .menu-toggle {
@@ -443,7 +460,8 @@ const nav = NAV.filter(
       height: 48px;
     }
   }
-  @media (max-width: 640px) {
+  /* điện thoại: cùng mốc 639px với kit */
+  @media (max-width: 639px) {
     .site-header {
       --hgut: 24px;
       --bar-h: 56px;
