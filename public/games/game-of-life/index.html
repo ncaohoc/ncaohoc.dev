@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game of Life</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" />
+<style>
+  /* Bảng màu lấy từ src/styles/global.css (mệnh Thủy) */
+  :root {
+    --paper: #edf2f6;
+    --surface: #f7fafc;
+    --ink: #0f1d2b;
+    --muted: #526171;
+    --rule: #cdd8e2;
+    --seal: #1a6fa3;
+    --seal-cut: #f4f8fb;
+    --grid: rgb(15 29 43 / 0.06);
+    --trail: rgb(26 111 163 / 0.16);
+    --glass: rgb(247 250 252 / 0.86);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light;
+  }
+  :root[data-theme='dark'] {
+    --paper: #06121f;
+    --surface: #0c2036;
+    --ink: #e6eef5;
+    --muted: #8d9aa8;
+    --rule: #1c2e42;
+    --seal: #5cc8ff;
+    --seal-cut: #06121f;
+    --grid: rgb(230 238 245 / 0.05);
+    --trail: rgb(92 200 255 / 0.16);
+    --glass: rgb(12 32 54 / 0.86);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font: 13px/1.3 var(--mono);
+  }
+  body { display: flex; flex-direction: column; }
+  #board {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--rule);
+    background: var(--glass);
+  }
+  .group { display: flex; align-items: center; gap: 6px; }
+  button, select {
+    font: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  button:hover, select:hover { border-color: var(--seal); }
+  button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 2px;
+  }
+  button.primary {
+    background: var(--seal);
+    border-color: var(--seal);
+    color: var(--seal-cut);
+    font-weight: 600;
+    min-width: 6.5em;
+  }
+  label { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+  input[type='range'] { width: 84px; accent-color: var(--seal); }
+  .stats { margin-left: auto; color: var(--muted); white-space: nowrap; }
+  .stats b { color: var(--ink); font-weight: 600; }
+  kbd {
+    font: inherit;
+    font-size: 11px;
+    padding: 0 4px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    color: var(--muted);
+  }
+  @media (max-width: 560px) {
+    body { font-size: 12px; }
+    .bar { padding: 6px 8px; gap: 6px; }
+    button, select { padding: 4px 8px; }
+    input[type='range'] { width: 64px; }
+    kbd { display: none; }
+    .stats { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<canvas id="board" aria-label="Lưới Game of Life. Bấm hoặc kéo để vẽ tế bào."></canvas>
+<div class="bar">
+  <div class="group">
+    <button class="primary" id="play" type="button">Chạy <kbd>Space</kbd></button>
+    <button id="step" type="button" title="Đi một thế hệ (phím N)">Bước</button>
+    <button id="random" type="button" title="Rải ngẫu nhiên (phím R)">Ngẫu nhiên</button>
+    <button id="clear" type="button" title="Xoá hết (phím C)">Xoá</button>
+  </div>
+  <div class="group">
+    <select id="pattern" aria-label="Mẫu có sẵn">
+      <option value="">Mẫu có sẵn…</option>
+      <option value="glider">Tàu lượn (glider)</option>
+      <option value="lwss">Phi thuyền (LWSS)</option>
+      <option value="pulsar">Pulsar</option>
+      <option value="pentadecathlon">Pentadecathlon</option>
+      <option value="gun">Súng Gosper</option>
+      <option value="rpent">R-pentomino</option>
+      <option value="acorn">Hạt sồi (acorn)</option>
+      <option value="diehard">Diehard</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>Tốc độ <input id="speed" type="range" min="1" max="60" value="12" /></label>
+    <label>Cỡ ô <input id="zoom" type="range" min="4" max="28" value="12" /></label>
+  </div>
+  <div class="stats" aria-live="off">Thế hệ <b id="gen">0</b> · Sống <b id="pop">0</b></div>
+</div>
+
+<script>
+  // Conway's Game of Life, luật B3/S23, lưới cuộn tròn (mép trái nối mép phải, trên nối dưới).
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  const $ = (id) => document.getElementById(id);
+  const playBtn = $('play'), speedIn = $('speed'), zoomIn = $('zoom'), patternSel = $('pattern');
+  const genEl = $('gen'), popEl = $('pop');
+
+  let cell = +zoomIn.value; // cỡ một ô, đơn vị CSS px
+  let cols = 0, rows = 0;
+  let grid = new Uint8Array(0), next = new Uint8Array(0);
+  let trail = new Uint8Array(0); // vệt mờ của ô vừa chết, đếm lùi về 0
+  let running = false, generation = 0, lastTick = 0;
+  let colors = {};
+
+  // ---- Giao diện sáng/tối: theo trang cha nếu cùng origin, không thì theo trình duyệt ----
+  function readTheme() {
+    let t = null;
+    try { t = parent !== window ? parent.document.documentElement.dataset.theme : null; } catch (e) {}
+    if (!t) { try { t = localStorage.getItem('theme'); } catch (e) {} }
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+    const cs = getComputedStyle(document.documentElement);
+    colors = {
+      paper: cs.getPropertyValue('--paper').trim(),
+      seal: cs.getPropertyValue('--seal').trim(),
+      grid: cs.getPropertyValue('--grid').trim(),
+      trail: cs.getPropertyValue('--trail').trim(),
+    };
+    draw();
+  }
+  try {
+    if (parent !== window) {
+      new MutationObserver(readTheme).observe(parent.document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+  } catch (e) {}
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTheme);
+
+  // ---- Lưới ----
+  const idx = (x, y) => y * cols + x;
+
+  // Tạo lại lưới theo kích thước khung, giữ phần đã vẽ ở chính giữa
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const nc = Math.max(8, Math.ceil(w / cell)), nr = Math.max(8, Math.ceil(h / cell));
+    if (nc === cols && nr === rows) return draw();
+    const g = new Uint8Array(nc * nr);
+    const ox = Math.floor((nc - cols) / 2), oy = Math.floor((nr - rows) / 2);
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const nx = x + ox, ny = y + oy;
+      if (nx >= 0 && ny >= 0 && nx < nc && ny < nr) g[ny * nc + nx] = grid[idx(x, y)];
+    }
+    cols = nc; rows = nr;
+    grid = g; next = new Uint8Array(nc * nr); trail = new Uint8Array(nc * nr);
+    draw();
+  }
+
+  function step() {
+    let pop = 0;
+    for (let y = 0; y < rows; y++) {
+      const up = ((y - 1 + rows) % rows) * cols, mid = y * cols, dn = ((y + 1) % rows) * cols;
+      for (let x = 0; x < cols; x++) {
+        const l = (x - 1 + cols) % cols, r = (x + 1) % cols;
+        const n = grid[up + l] + grid[up + x] + grid[up + r] + grid[mid + l] + grid[mid + r] + grid[dn + l] + grid[dn + x] + grid[dn + r];
+        const i = mid + x;
+        const alive = n === 3 || (n === 2 && grid[i]) ? 1 : 0;
+        next[i] = alive;
+        if (alive) pop++;
+        else if (grid[i]) trail[i] = 6;
+        else if (trail[i]) trail[i]--;
+      }
+    }
+    [grid, next] = [next, grid];
+    generation++;
+    if (pop === 0 && running) setRunning(false);
+    draw();
+  }
+
+  function draw() {
+    if (!cols) return;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.fillStyle = colors.paper;
+    ctx.fillRect(0, 0, w, h);
+    // Đường lưới chỉ vẽ khi ô đủ lớn để nhìn rõ
+    if (cell >= 8) {
+      ctx.strokeStyle = colors.grid;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = 0; x <= cols; x++) { ctx.moveTo(x * cell + 0.5, 0); ctx.lineTo(x * cell + 0.5, h); }
+      for (let y = 0; y <= rows; y++) { ctx.moveTo(0, y * cell + 0.5); ctx.lineTo(w, y * cell + 0.5); }
+      ctx.stroke();
+    }
+    const pad = cell >= 8 ? 1 : 0;
+    const s = cell - pad * 2;
+    ctx.fillStyle = colors.trail;
+    for (let i = 0; i < grid.length; i++) {
+      if (!grid[i] && trail[i]) ctx.fillRect((i % cols) * cell + pad, ((i / cols) | 0) * cell + pad, s, s);
+    }
+    let pop = 0;
+    ctx.fillStyle = colors.seal;
+    for (let i = 0; i < grid.length; i++) {
+      if (grid[i]) {
+        pop++;
+        ctx.fillRect((i % cols) * cell + pad, ((i / cols) | 0) * cell + pad, s, s);
+      }
+    }
+    genEl.textContent = generation;
+    popEl.textContent = pop;
+  }
+
+  // ---- Chạy / dừng ----
+  function setRunning(on) {
+    running = on;
+    playBtn.firstChild.textContent = on ? 'Dừng ' : 'Chạy ';
+  }
+  function loop(t) {
+    if (running && t - lastTick >= 1000 / +speedIn.value) { lastTick = t; step(); }
+    requestAnimationFrame(loop);
+  }
+
+  function clearAll() {
+    grid.fill(0); trail.fill(0); generation = 0; setRunning(false); draw();
+  }
+  function randomize() {
+    for (let i = 0; i < grid.length; i++) grid[i] = Math.random() < 0.22 ? 1 : 0;
+    trail.fill(0); generation = 0; draw();
+  }
+
+  // ---- Mẫu có sẵn, ghi bằng chuỗi: 'O' là ô sống, '.' là ô trống ----
+  const PATTERNS = {
+    glider: ['.O.', '..O', 'OOO'],
+    lwss: ['.O..O', 'O....', 'O...O', 'OOOO.'],
+    pulsar: [
+      '..OOO...OOO..', '.............', 'O....O.O....O', 'O....O.O....O', 'O....O.O....O', '..OOO...OOO..',
+      '.............',
+      '..OOO...OOO..', 'O....O.O....O', 'O....O.O....O', 'O....O.O....O', '.............', '..OOO...OOO..',
+    ],
+    pentadecathlon: ['..O....O..', 'OO.OOOO.OO', '..O....O..'],
+    gun: [
+      '........................O...........',
+      '......................O.O...........',
+      '............OO......OO............OO',
+      '...........O...O....OO............OO',
+      'OO........O.....O...OO..............',
+      'OO........O...O.OO....O.O...........',
+      '..........O.....O.......O...........',
+      '...........O...O....................',
+      '............OO......................',
+    ],
+    rpent: ['.OO', 'OO.', '.O.'],
+    acorn: ['.O.....', '...O...', 'OO..OOO'],
+    diehard: ['......O.', 'OO......', '.O...OOO'],
+  };
+  function placePattern(name) {
+    const p = PATTERNS[name];
+    if (!p) return;
+    const pw = p[0].length, ph = p.length;
+    // Lưới nhỏ quá thì thu cỡ ô cho vừa mẫu
+    while ((cols < pw + 4 || rows < ph + 4) && cell > 4) { cell--; zoomIn.value = cell; resize(); }
+    clearAll();
+    // Súng Gosper đặt lệch trái để tàu lượn có đường bay
+    const ox = name === 'gun' ? 2 : Math.floor((cols - pw) / 2);
+    const oy = Math.floor((rows - ph) / 2);
+    p.forEach((row, y) => [...row].forEach((c, x) => {
+      if (c === 'O') grid[idx((ox + x + cols) % cols, (oy + y + rows) % rows)] = 1;
+    }));
+    draw();
+  }
+
+  // ---- Vẽ bằng chuột / chạm: ô đầu tiên quyết định đang vẽ hay đang tẩy ----
+  let painting = false, paintValue = 1, lastCell = -1;
+  function cellAt(e) {
+    const r = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - r.left) / cell), y = Math.floor((e.clientY - r.top) / cell);
+    return x >= 0 && y >= 0 && x < cols && y < rows ? idx(x, y) : -1;
+  }
+  canvas.addEventListener('pointerdown', (e) => {
+    const i = cellAt(e);
+    if (i < 0) return;
+    canvas.setPointerCapture(e.pointerId);
+    painting = true;
+    paintValue = grid[i] ? 0 : 1;
+    grid[i] = paintValue; lastCell = i;
+    draw();
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!painting) return;
+    const i = cellAt(e);
+    if (i < 0 || i === lastCell) return;
+    grid[i] = paintValue; lastCell = i;
+    draw();
+  });
+  const stopPaint = () => { painting = false; lastCell = -1; };
+  canvas.addEventListener('pointerup', stopPaint);
+  canvas.addEventListener('pointercancel', stopPaint);
+
+  // ---- Nút và phím tắt ----
+  playBtn.addEventListener('click', () => setRunning(!running));
+  $('step').addEventListener('click', () => { setRunning(false); step(); });
+  $('random').addEventListener('click', randomize);
+  $('clear').addEventListener('click', clearAll);
+  patternSel.addEventListener('change', () => {
+    placePattern(patternSel.value);
+    patternSel.value = '';
+    canvas.focus();
+  });
+  zoomIn.addEventListener('input', () => { cell = +zoomIn.value; resize(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    // Phím trên nút hoặc ô chọn đang focus thì để chúng tự xử lý
+    const tag = document.activeElement && document.activeElement.tagName;
+    if ((e.key === ' ' || e.key === 'Enter') && (tag === 'BUTTON' || tag === 'SELECT')) return;
+    if (tag === 'SELECT' || tag === 'INPUT') return;
+    const k = e.key.toLowerCase();
+    if (k === ' ') setRunning(!running);
+    else if (k === 'escape') setRunning(false);
+    else if (k === 'n') { setRunning(false); step(); }
+    else if (k === 'r') randomize();
+    else if (k === 'c') clearAll();
+    else return;
+    e.preventDefault();
+  });
+
+  canvas.tabIndex = 0;
+  new ResizeObserver(resize).observe(canvas);
+  readTheme();
+  resize();
+  placePattern('acorn');
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>
