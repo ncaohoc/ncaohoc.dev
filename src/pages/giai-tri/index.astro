@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import EntryList from '../../components/EntryList.astro';
+import GameShelf from '../../components/GameShelf.astro';
 import { published } from '../../site';
 
 const games = published(await getCollection('games'));
@@ -9,19 +9,131 @@ const games = published(await getCollection('games'));
 
 <Base title="Giải trí" description="Những game nhỏ mình tự làm, chơi ngay trên trình duyệt.">
   <div class="wrap">
-    <header class="page-head">
-      <h1>Giải trí</h1>
-      <p>Những game nhỏ mình tự làm, chơi ngay trên trình duyệt, không cần cài đặt.</p>
+    <header class="page-head arcade-head">
+      <!-- Nền Game of Life chạy chậm sau tiêu đề; GameShelf lo phần chạy -->
+      <canvas class="head-life" data-life data-seed="giai-tri" data-cell="10" data-speed="220" aria-hidden="true"></canvas>
+      <p class="kicker"><span class="dot" aria-hidden="true"></span> {games.length} game · 0 xu · chơi miễn phí</p>
+      <h1>Giải trí<span class="cursor" aria-hidden="true">_</span></h1>
+      <p>Những game nhỏ mình tự làm, chơi ngay trên trình duyệt, không cần cài đặt. Không có quảng cáo, không bắt nạp thẻ.</p>
+      {
+        games.length > 1 && (
+          <p class="dice-row">
+            <button type="button" class="btn dice" data-dice>
+              <span class="die" aria-hidden="true">⚄</span> Chọn bừa một game
+            </button>
+            <span class="visually-hidden" aria-live="polite" data-dice-status></span>
+          </p>
+        )
+      }
     </header>
-    <EntryList
+    <GameShelf
       items={games.map((g) => ({
         href: `/giai-tri/${g.id}/`,
         title: g.data.title,
-        description: g.data.description,
+        description: g.data.description ?? '',
         date: g.data.date,
-        tags: g.data.tags,
+        controls: g.data.controls,
+        stack: g.data.stack,
+        cover: g.data.cover,
       }))}
-      empty="Chưa có game nào. Sắp có."
     />
+    <p class="footnote">Hết game rồi. Mình đang làm thêm, ghé lại sau nhé <span aria-hidden="true">&lt;(")</span></p>
   </div>
 </Base>
+
+<style>
+  .arcade-head {
+    position: relative;
+    isolation: isolate;
+  }
+  .head-life {
+    position: absolute;
+    z-index: -1;
+    inset: 0 calc(var(--gutter) * -1);
+    width: calc(100% + var(--gutter) * 2);
+    height: 100%;
+    --life-bg: transparent;
+    --life-live: color-mix(in srgb, var(--jade) 16%, transparent);
+    --life-old: color-mix(in srgb, var(--jade) 8%, transparent);
+    /* mờ dần về hai mép và phía dưới để chữ dễ đọc */
+    mask-image: radial-gradient(120% 90% at 85% 30%, #000 20%, transparent 75%);
+  }
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.9rem !important;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--jade) !important;
+  }
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--jade);
+    box-shadow: 0 0 0 0 var(--jade);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    70% {
+      box-shadow: 0 0 0 0.5rem transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+  .arcade-head h1 {
+    font-size: var(--step-4);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .cursor {
+    color: var(--jade);
+    animation: caret 1.1s steps(2, jump-none) infinite;
+  }
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  .dice-row {
+    margin-top: 1.5rem !important;
+  }
+  .die {
+    display: inline-block;
+    font-size: 1.25em;
+    line-height: 1;
+    transition: rotate 0.4s var(--ease);
+  }
+  @media (hover: hover) {
+    .dice:hover .die {
+      rotate: 90deg;
+    }
+  }
+  .dice.rolling .die {
+    animation: roll 0.45s linear infinite;
+  }
+  @keyframes roll {
+    to {
+      rotate: 360deg;
+    }
+  }
+  .footnote {
+    margin: 2.5rem 0 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dot,
+    .cursor,
+    .dice.rolling .die {
+      animation: none;
+    }
+  }
+</style>

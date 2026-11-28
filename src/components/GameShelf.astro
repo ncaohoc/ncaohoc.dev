@@ -1,0 +1,441 @@
+---
+// Kệ game của mục Giải trí: mỗi game là một "màn hình" lớn, có ảnh bìa hoặc một
+// Game of Life chạy sống làm ảnh bìa tạm. Nút xúc xắc chọn bừa một game.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Item {
+  href: string;
+  title: string;
+  description: string;
+  date: Date;
+  controls: string;
+  stack: string[];
+  cover?: ImageMetadata;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+
+// Game đăng trong 21 ngày gần nhất có nhãn "Mới"
+const NEW_DAYS = 21;
+const now = Date.now();
+const isNew = (d: Date) => now - d.getTime() < NEW_DAYS * 86400000;
+
+// Biểu tượng theo cách điều khiển
+const controlIcon = (c: string) => {
+  const s = c.toLowerCase();
+  if (s.includes('bàn phím')) return '⌨';
+  if (s.includes('chạm')) return '☝';
+  return '🖱';
+};
+---
+
+{
+  items.length === 0 ? (
+    <p class="empty">Chưa có game nào. Sắp có.</p>
+  ) : (
+    <ul class="shelf">
+      {items.map((g, i) => (
+        <li class="game" data-href={g.href} style={`--i:${i}`}>
+          <div class="screen">
+            {g.cover ? (
+              <Image class="cover" src={g.cover} alt="" widths={[480, 800]} sizes="(min-width: 60rem) 32rem, 100vw" format="webp" />
+            ) : (
+              <canvas class="cover" data-life data-seed={g.title} aria-hidden="true" />
+            )}
+            <span class="scan" aria-hidden="true" />
+            <span class="press" aria-hidden="true">▶ BẤM ĐỂ CHƠI</span>
+            {isNew(g.date) && <span class="badge">Mới</span>}
+            <span class="slot" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          </div>
+          <div class="body">
+            <h2>
+              <a class="card-link" href={g.href}>{g.title}</a>
+            </h2>
+            <p class="desc">{g.description}</p>
+            <ul class="chips" aria-label="Thông tin">
+              <li class="ctl"><span aria-hidden="true">{controlIcon(g.controls)}</span> {g.controls}</li>
+              {g.stack.map((t) => <li>{t}</li>)}
+            </ul>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<script>
+  // Game of Life thu nhỏ: dùng làm ảnh bìa cho game chưa có ảnh và làm nền đầu trang.
+  // Màu lấy từ biến CSS, đổi theo sáng/tối. Chỉ chạy khi thấy trên màn hình.
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function hash(s: string) {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+    return h >>> 0;
+  }
+  function rng(seed: number) {
+    return () => ((seed = Math.imul(seed ^ (seed >>> 15), 2246822507) + 0x9e3779b9) >>> 0) / 4294967296;
+  }
+
+  function life(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const cell = Number(canvas.dataset.cell || 8);
+    const rand = rng(hash(canvas.dataset.seed || 'life'));
+    let cols = 0, rows = 0, grid = new Uint8Array(0), age = new Uint8Array(0);
+    let colors = { bg: '', live: '', old: '' };
+
+    const readColors = () => {
+      const cs = getComputedStyle(canvas);
+      colors = {
+        bg: cs.getPropertyValue('--life-bg').trim() || 'transparent',
+        live: cs.getPropertyValue('--life-live').trim(),
+        old: cs.getPropertyValue('--life-old').trim(),
+      };
+    };
+    const seed = () => {
+      for (let i = 0; i < grid.length; i++) grid[i] = rand() < 0.28 ? 1 : 0;
+      age.fill(0);
+    };
+    const resize = () => {
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.round(r.width * dpr));
+      canvas.height = Math.max(1, Math.round(r.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(r.width / cell);
+      rows = Math.ceil(r.height / cell);
+      grid = new Uint8Array(cols * rows);
+      age = new Uint8Array(cols * rows);
+      seed();
+    };
+    const step = () => {
+      const next = new Uint8Array(grid.length);
+      let alive = 0;
+      for (let y = 0; y < rows; y++)
+        for (let x = 0; x < cols; x++) {
+          let n = 0;
+          for (let dy = -1; dy <= 1; dy++)
+            for (let dx = -1; dx <= 1; dx++) {
+              if (!dx && !dy) continue;
+              n += grid[((y + dy + rows) % rows) * cols + ((x + dx + cols) % cols)];
+            }
+          const i = y * cols + x;
+          const v = n === 3 || (n === 2 && grid[i]) ? 1 : 0;
+          next[i] = v;
+          age[i] = v ? Math.min(age[i] + 1, 255) : 0;
+          alive += v;
+        }
+      grid = next;
+      // Lưới gần chết thì gieo lại cho đỡ trống
+      if (alive < grid.length * 0.04) seed();
+    };
+    const draw = () => {
+      const w = cols * cell, h = rows * cell;
+      ctx.clearRect(0, 0, w, h);
+      if (colors.bg !== 'transparent') {
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(0, 0, w, h);
+      }
+      for (let i = 0; i < grid.length; i++) {
+        if (!grid[i]) continue;
+        ctx.fillStyle = age[i] > 6 ? colors.old : colors.live;
+        ctx.fillRect((i % cols) * cell + 1, Math.floor(i / cols) * cell + 1, cell - 2, cell - 2);
+      }
+    };
+
+    readColors();
+    resize();
+    draw();
+    // Đổi sáng/tối thì đọc lại màu
+    new MutationObserver(() => { readColors(); draw(); }).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    new ResizeObserver(() => { resize(); draw(); }).observe(canvas);
+    if (reduce) return;
+
+    let visible = false, last = 0;
+    const speed = Number(canvas.dataset.speed || 140);
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) requestAnimationFrame(loop);
+    }).observe(canvas);
+    function loop(t: number) {
+      if (!visible || document.hidden) return;
+      if (t - last > speed) { step(); draw(); last = t; }
+      requestAnimationFrame(loop);
+    }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) requestAnimationFrame(loop); });
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas[data-life]').forEach(life);
+
+  // Xúc xắc: đèn chạy qua các game như vòng quay, dừng ở đâu thì vào game đó
+  const dice = document.querySelector<HTMLButtonElement>('[data-dice]');
+  const games = [...document.querySelectorAll<HTMLElement>('.shelf .game')];
+  const live = document.querySelector<HTMLElement>('[data-dice-status]');
+  if (dice && games.length) {
+    dice.addEventListener('click', () => {
+      if (dice.disabled) return;
+      const pick = Math.floor(Math.random() * games.length);
+      const go = () => { location.href = games[pick].dataset.href!; };
+      const title = games[pick].querySelector('h2')?.textContent?.trim();
+      if (live) live.textContent = `Xúc xắc chọn: ${title}`;
+      if (reduce) return go();
+      dice.disabled = true;
+      dice.classList.add('rolling');
+      // số bước đủ cho vài vòng rồi dừng đúng ở game đã chọn
+      const steps = games.length * 3 + pick + 1;
+      let n = 0;
+      const tick = () => {
+        games.forEach((g) => g.classList.remove('lit'));
+        games[n % games.length].classList.add('lit');
+        n++;
+        if (n < steps) setTimeout(tick, 60 + (n / steps) ** 3 * 260);
+        else {
+          games[pick].classList.add('picked');
+          setTimeout(go, 550);
+        }
+      };
+      tick();
+    });
+    // Quay lại bằng nút Back thì trang có thể lấy từ bộ nhớ đệm, trả trạng thái về như cũ
+    addEventListener('pageshow', () => {
+      dice.disabled = false;
+      dice.classList.remove('rolling');
+      games.forEach((g) => g.classList.remove('lit', 'picked'));
+    });
+  }
+</script>
+
+<style>
+  .empty {
+    color: var(--muted);
+    margin: 0;
+  }
+  .shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .game {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+    transition:
+      transform 0.3s var(--ease),
+      box-shadow 0.3s var(--ease),
+      border-color 0.3s;
+    animation: drop-in 0.6s var(--ease) both;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+  @keyframes drop-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.98);
+    }
+  }
+  /* Màn hình game: viền như máy chơi game, có vạch quét CRT */
+  .screen {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--code-bg);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    --life-bg: var(--code-bg);
+    --life-live: var(--jade);
+    --life-old: color-mix(in srgb, var(--jade) 45%, var(--code-bg));
+  }
+  .cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      transform 0.6s var(--ease),
+      filter 0.4s;
+  }
+  .scan {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      color-mix(in srgb, var(--ink) 10%, transparent) 2px 3px
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .press {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    translate: -50% 0.5rem;
+    padding: 0.35rem 0.8rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--paper);
+    background: var(--ink);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    opacity: 0;
+    transition:
+      opacity 0.25s,
+      translate 0.3s var(--ease);
+  }
+  .badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--seal-cut);
+    background: var(--seal);
+    border-radius: 999px;
+    rotate: -4deg;
+    box-shadow: var(--shadow-1);
+  }
+  .slot {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.8rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--paper);
+    background: color-mix(in srgb, var(--ink) 70%, transparent);
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+  }
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1.1rem 1.3rem 1.3rem;
+    flex: 1;
+  }
+  h2 {
+    font-size: var(--step-2);
+    line-height: 1.2;
+    margin: 0;
+  }
+  .desc {
+    margin: 0;
+    color: var(--muted);
+    flex: 1;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0;
+  }
+  .chips li {
+    font-size: 0.8rem;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 0.05rem 0.6rem;
+  }
+  .chips .ctl {
+    color: var(--jade);
+    background: var(--jade-soft);
+    border-color: transparent;
+  }
+
+  /* Di chuột / focus / đèn xúc xắc: card nhấc lên, màn hình "bật" */
+  .game:focus-within,
+  .game.lit,
+  .game.picked {
+    border-color: color-mix(in srgb, var(--jade) 55%, var(--rule));
+    box-shadow: var(--shadow-2);
+  }
+  .game.lit {
+    transform: translateY(-4px);
+  }
+  .game.picked {
+    transform: translateY(-6px) scale(1.02);
+    outline: 3px solid var(--jade);
+    outline-offset: 3px;
+  }
+  .game:focus-within .scan,
+  .game.lit .scan,
+  .game.picked .scan {
+    opacity: 1;
+  }
+  .game:focus-within .press,
+  .game.picked .press {
+    opacity: 1;
+    translate: -50% 0;
+    animation: blink 1s steps(2, jump-none) infinite;
+  }
+  .game:focus-within .card-link,
+  .game.picked .card-link {
+    color: var(--jade);
+  }
+  @media (hover: hover) {
+    .game:hover {
+      transform: translateY(-5px) rotate(-0.4deg);
+      box-shadow: var(--shadow-2);
+      border-color: color-mix(in srgb, var(--jade) 55%, var(--rule));
+    }
+    .game:nth-child(even):hover {
+      transform: translateY(-5px) rotate(0.4deg);
+    }
+    .game:hover .cover {
+      transform: scale(1.05);
+      filter: saturate(1.15);
+    }
+    .game:hover .scan {
+      opacity: 1;
+    }
+    .game:hover .press {
+      opacity: 1;
+      translate: -50% 0;
+      animation: blink 1s steps(2, jump-none) infinite;
+    }
+    .game:hover .card-link {
+      color: var(--jade);
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .game,
+    .game:hover,
+    .game:nth-child(even):hover {
+      animation: none;
+      transform: none;
+    }
+    .game:hover .cover {
+      transform: none;
+    }
+    .press {
+      animation: none !important;
+    }
+  }
+</style>
