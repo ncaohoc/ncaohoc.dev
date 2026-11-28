@@ -15,6 +15,8 @@ const { src, title, aspect = '16 / 9', controls, cover } = Astro.props;
 // Tỉ lệ dạng số để tính bề rộng khung theo chiều cao màn hình
 const [aw, ah = 1] = aspect.split('/').map((n) => parseFloat(n));
 const ratio = aw / ah || 16 / 9;
+// Chỉ nhắc "nên chơi trên máy tính" khi game cần bàn phím
+const needsKeyboard = !controls || /bàn phím/i.test(controls);
 ---
 
 <section class="player" id="choi" style={`--ratio: ${ratio}`} aria-label={`Chơi ${title}`} data-player data-src={src} data-title={title}>
@@ -23,7 +25,7 @@ const ratio = aw / ah || 16 / 9;
     <div class="start" data-start>
       <button class="btn" type="button" data-play>Bắt đầu chơi</button>
       {controls && <p>{controls}</p>}
-      <p class="touch-note">Game cần bàn phím và chuột, nên chơi trên máy tính.</p>
+      {needsKeyboard && <p class="touch-note">Game cần bàn phím và chuột, nên chơi trên máy tính.</p>}
     </div>
   </div>
   <div class="bar">
